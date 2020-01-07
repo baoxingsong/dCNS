@@ -1,0 +1,9 @@
+Here are the score profiles for weighted sequence alignment
+For each score profile file,
+        line 1: match score
+        line 2: mis-match score
+        line 3: open gap penalty
+        line 4: extend gap penalty
+        line 5: secondary open gap penalty
+        line 6: secondary extend gap penalty
+        line 7: x/z value for x-drop/z-drop approach
