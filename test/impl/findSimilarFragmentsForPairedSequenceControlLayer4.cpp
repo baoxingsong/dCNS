@@ -237,7 +237,7 @@ TEST(controlLayer, cutAndLinkdApproach){ // just to make sure that every line ha
     bool onlySyntenic = false;
 
     cut1Gap(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-            extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+            extendGapPenalty1, seed_window_size, mini_cns_score,
             step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, w, xDrop, refFasta, queryFasta, pvalues);
 
 }
