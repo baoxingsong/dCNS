@@ -63,7 +63,7 @@ void readFastaFile( const std::string& filePath, std::map<std::string, std::stri
             // this method is faster than regular expression
             if( name.size()>0 ){
                 std::string sequence = sequencestream.str();
-                (sequence.begin(), sequence.end(), sequence.begin(),::toupper);
+                (sequence.begin(), sequence.end(), sequence.begin(), ::toupper);
                 sequences[name]=sequence;
 //                std::cout << std::endl << "line 68" << name << " " << sequence << std::endl;
                 seqNames.push_back(name);

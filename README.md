@@ -139,5 +139,9 @@ cat 5.sam| sort | uniq >5_uniq.sam
 samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
 ```
 
+The output file is in sam format, and it works with majority functions implemented in tools compatible with sam format.
+The 5th column is the sequence alignment score, there would be some information lost it convert the sam files into bam files.
+The 6th column is always start with regex `[0-9]+H` , which tells the coordinate where query sequence alignment start from, the value is 1 based coordinate.
+
 # Citation
-manuscript under preparation
+The dCNS manuscript is under preparation

@@ -6,13 +6,13 @@
  *    Description:
  *
  *        Version:  1.0
- *        Created:  06/25/2018 01:13:39
- *       Revision:  08/12/2018
+ *        Created:  06/25/2019 01:13:39
+ *       Revision:  08/12/2019
  *       Compiler:  gcc
  *
  *         Author:  Baoxing Song (songbx.me), songbaoxing168@163.com
  *
- *         Lynn Johnson performed review reading on 08/12/2018
+ *         Lynn Johnson performed review reading on 08/12/2019
  *
  * =====================================================================================
  */
@@ -278,7 +278,6 @@ void SmithWaterman(int8_t *ref, int8_t *read, const int32_t &refLen,
             for (j = 0; j < _segLen; ++j) {
                 vH = _mm256_add_epi8(vH, _mm256_loadu_si256(vP + j)); // add the scoring profile to vH
                 vH = _mm256_max_epi8(vH, vZero); /* vH will be always > 0 */
-
 
                 /* Get max from vH, vE and vF. */
                 e = _mm256_loadu_si256(pvE + j);
@@ -679,7 +678,7 @@ void SmithWaterman(int8_t *seq1, int8_t *seq2, const int32_t &length1,
 
 
 //standard implementing of SemiGlobal sequence alignment approach
-std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &length1,
+std::vector<uint32_t> SemiGlobal_no_avx(int8_t *seq1, int8_t *seq2, const int32_t &length1,
                                  const int32_t &length2, const int &_open_gap_penalty1, const int &_extend_gap_penalty1,
                                  const int &_open_gap_penalty2, const int &_extend_gap_penalty2,
                                  int32_t &maxScore, int32_t &endPosition1, int32_t &endPosition2, const Scorei & m,
@@ -713,13 +712,10 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
         int32_t thisMaxj = 0;
 
         int32_t start = i - w;
-        if ( start < 1 ){
-            start = 1;
-        }
+        start = start <1 ? 1: start;
+
         int32_t end = i + w;
-        if( end > length2 ){
-            end = length2;
-        }
+        end = end > length2 ? length2 : end;
 
         e1 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         e2 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
@@ -727,7 +723,7 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
         F2[end] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
 
         if( returnCigar ) {
-            for (j = start; j <= end; ++j) {
+            for (j = start; j < end; ++j) {
                 mscore = m.getScore(seq1[i - 1], seq2[j - 1]) + M1[j - 1];
 
                 d = mscore > F1[j] ? 0 : 1;
@@ -747,31 +743,53 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
                     thisMax = mscore;
                     thisMaxj = j;
                 }
-                if(j < end){
-                    int32_t h = mscore + _open_gap_penalty1;
-                    int32_t f = F1[j] + _extend_gap_penalty1;
-                    d |= f >= h ? 1 << 3 : 0;
-                    f = f >= h ? f : h;
-                    F1[j] = f;
 
-                    e1 += _extend_gap_penalty1;
-                    d |= e1 >= h ? 1 << 4 : 0;
-                    e1 = e1 >= h ? e1 : h;
+                int32_t h = mscore + _open_gap_penalty1;
+                int32_t f = F1[j] + _extend_gap_penalty1;
+                d |= f >= h ? 1 << 3 : 0;
+                f = f >= h ? f : h;
+                F1[j] = f;
 
-                    int32_t h2 = mscore + _open_gap_penalty2;
-                    int32_t f2 = F2[j] + _extend_gap_penalty2;
-                    d |= f2 >= h2 ? 1 << 5 : 0;
-                    f2 = f2 >= h2 ? f2 : h2;
-                    F2[j] = f2;
+                e1 += _extend_gap_penalty1;
+                d |= e1 >= h ? 1 << 4 : 0;
+                e1 = e1 >= h ? e1 : h;
 
-                    e2 += _extend_gap_penalty2;
-                    d |= e2 >= h2 ? 1 << 6 : 0;
-                    e2 = e2 >= h2 ? e2 : h2;
-                }
+                int32_t h2 = mscore + _open_gap_penalty2;
+                int32_t f2 = F2[j] + _extend_gap_penalty2;
+                d |= f2 >= h2 ? 1 << 5 : 0;
+                f2 = f2 >= h2 ? f2 : h2;
+                F2[j] = f2;
+
+                e2 += _extend_gap_penalty2;
+                d |= e2 >= h2 ? 1 << 6 : 0;
+                e2 = e2 >= h2 ? e2 : h2;
+
                 T.set(i, j, d);
             }
+            j=end;
+            {
+                mscore = m.getScore(seq1[i - 1], seq2[j - 1]) + M1[j - 1];
+
+                d = mscore > F1[j] ? 0 : 1;
+                mscore = mscore > F1[j] ? mscore : F1[j];
+
+                d = mscore > e1 ? d : 2;
+                mscore = mscore > e1 ? mscore : e1;
+
+                d = mscore > F2[j] ? d : 3;
+                mscore = mscore > F2[j] ? mscore : F2[j];
+
+                d = mscore > e2 ? d : 4;
+                mscore = mscore > e2 ? mscore : e2;
+
+                M2[j] = mscore;
+                if ( mscore > thisMax){
+                    thisMax = mscore;
+                    thisMaxj = j;
+                }
+            }
         }else{
-            for ( j=start; j<=end; ++j ){
+            for ( j=start; j<end; ++j ){
                 mscore = m.getScore(seq1[i - 1], seq2[j - 1]) + M1[j - 1];
 
                 mscore = mscore > F1[j] ? mscore : F1[j];
@@ -787,23 +805,38 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
                     thisMax = mscore;
                     thisMaxj = j;
                 }
-                if(j < end) {
+                int32_t h = mscore + _open_gap_penalty1;
+                int32_t f = F1[j] + _extend_gap_penalty1;
+                f = f >= h ? f : h;
+                F1[j] = f;
 
-                    int32_t h = mscore + _open_gap_penalty1;
-                    int32_t f = F1[j] + _extend_gap_penalty1;
-                    f = f >= h ? f : h;
-                    F1[j] = f;
+                e1 += _extend_gap_penalty1;
+                e1 = e1 >= h ? e1 : h;
 
-                    e1 += _extend_gap_penalty1;
-                    e1 = e1 >= h ? e1 : h;
+                int32_t h2 = mscore + _open_gap_penalty2;
+                int32_t f2 = F2[j] + _extend_gap_penalty2;
+                f2 = f2 >= h2 ? f2 : h2;
+                F2[j] = f2;
 
-                    int32_t h2 = mscore + _open_gap_penalty2;
-                    int32_t f2 = F2[j] + _extend_gap_penalty2;
-                    f2 = f2 >= h2 ? f2 : h2;
-                    F2[j] = f2;
+                e2 += _extend_gap_penalty2;
+                e2 = e2 >= h2 ? e2 : h2;
+            }
+            j = end;
+            {
+                mscore = m.getScore(seq1[i - 1], seq2[j - 1]) + M1[j - 1];
 
-                    e2 += _extend_gap_penalty2;
-                    e2 = e2 >= h2 ? e2 : h2;
+                mscore = mscore > F1[j] ? mscore : F1[j];
+
+                mscore = mscore > e1 ? mscore : e1;
+
+                mscore = mscore > F2[j] ? mscore : F2[j];
+
+                mscore = mscore > e2 ? mscore : e2;
+
+                M2[j] = mscore;
+                if ( mscore > thisMax){
+                    thisMax = mscore;
+                    thisMaxj = j;
                 }
             }
         }
@@ -827,7 +860,7 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
         M1 = M2;
         M2 = t;
     }
-//    std::cout << "line 861 endPosition1 " << endPosition1 << " endPosition2: " << endPosition2 << " maxScore: " << maxScore << std::endl;
+
     std::vector<uint32_t> cigar;
     if( returnCigar ){
         uint32_t op = 0;
@@ -893,6 +926,19 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
 //    std::cout << "line 889 endPosition1 " << endPosition1 << " endPosition2: " << endPosition2 << " maxScore: " << maxScore << std::endl;
 
     return cigar;
+}
+
+
+
+std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &length1,
+                                        const int32_t &length2, const int &_open_gap_penalty1, const int &_extend_gap_penalty1,
+                                        const int &_open_gap_penalty2, const int &_extend_gap_penalty2,
+                                        int32_t &maxScore, int32_t &endPosition1, int32_t &endPosition2, const Scorei & m,
+                                        bool returnCigar, const int32_t & zdrop, const int32_t & w, Matrix & T){
+   return SemiGlobal_no_avx(seq1, seq2, length1, length2, _open_gap_penalty1, _extend_gap_penalty1, _open_gap_penalty2,
+           _extend_gap_penalty2, maxScore, endPosition1, endPosition2, m, returnCigar, zdrop, w, T);
+
+
 }
 
 
@@ -1144,11 +1190,11 @@ std::vector<uint32_t> mapCnsToGenome(int8_t *seq1, int8_t *seq2, const int32_t &
 
 
 
-// this is a x-drop sequence alignment extension approach
+// this is a x-drop sequence alignment extension approach, and do not return cigar
 void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
                                  const int32_t &length2, const int &_open_gap_penalty, const int &_extend_gap_penalty,
                                  int32_t &maxScore, int32_t &endPosition1, int32_t &endPosition2, const Scorei & m,
-                                 const int32_t & xdrop, const int32_t & w){
+                                 const int32_t & xdrop, const int32_t & w){// not sure this band approach and avx which is faster
     int32_t i, j, mscore;
     int32_t * t;
     int32_t * M1 = new int32_t [length2 + 1]; //M1 and M2 is for the previous column and the current column
@@ -1173,14 +1219,10 @@ void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
     for ( i=1; i<=length1; ++i ){
         thisMax = 0;
         thisMaxj=-1;
-        start = i - w;
-        if ( start < 1 ){
-            start = 1;
-        }
-        end = i + w;
-        if( end > length2 ){
-            end = length2;
-        }
+
+        start = i - w > 1 ? i - w : 1;
+        end = i + w < length2 ?  i + w : length2;
+
         e = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         F[end] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         for ( j=start; j<=end; ++j ){
@@ -1223,7 +1265,8 @@ void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
     --endPosition2;
 }
 
-//same with above one, but returen cigar
+
+//same with above one, but return cigar
 std::vector<uint32_t> SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
                         const int32_t &length2, const int &_open_gap_penalty, const int &_extend_gap_penalty,
                         int32_t &maxScore, int32_t &endPosition1, int32_t &endPosition2, const Scorei & m,
@@ -1256,14 +1299,9 @@ std::vector<uint32_t> SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32
         thisMax = 0;
         thisMaxj=-1;
 
-        start = i - w;
-        if ( start < 1 ){
-            start = 1;
-        }
-        end = i + w;
-        if( end > length2 ){
-            end = length2;
-        }
+        start = i - w > 1 ? i - w : 1;
+        end = i + w < length2 ?  i + w : length2;
+
         e = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         F[end] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         for (j = start; j <= end; ++j) {
@@ -1638,17 +1676,15 @@ std::vector<uint32_t> SemiGlobal_single_gap_penalty(int8_t *seq1, int8_t *seq2, 
     int32_t e1, zdrop, _open_gap_penalty1, _extend_gap_penalty1;
     int32_t ** m;
 
+    int32_t start;
+    int32_t end;
+
     for ( i=1; i<=length1; ++i ){
         int32_t thisMax = 0;
         int32_t thisMaxj=-1;
-        int32_t start = i - w;
-        if ( start < 1 ){
-            start = 1;
-        }
-        int32_t end = i + w;
-        if( end > length2 ){
-            end = length2;
-        }
+
+        start = i - w > 1 ? i - w : 1;
+        end = i + w < length2 ?  i + w : length2;
 
         e1 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
 

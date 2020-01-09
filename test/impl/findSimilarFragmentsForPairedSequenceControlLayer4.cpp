@@ -139,7 +139,7 @@ TEST(controlLayer, weighted1Gap){
     bool onlySyntenic = false;
 
     weighted1Gap(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-                 extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+                 extendGapPenalty1, seed_window_size, mini_cns_score,
                  step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, bandwidth, w, xDrop, zDrop, scoreFoler,
                  refFasta, gffFile, pvalues);
 }
@@ -189,7 +189,7 @@ TEST(controlLayer, weighted2Gaps){
     std::string refFasta = "/home/bs674/Zea_mays.B73_RefGen_v4.dna.toplevel.fa";
     bool onlySyntenic = false;
     weighted2Gaps(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-                  extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+                  extendGapPenalty1,  seed_window_size, mini_cns_score,
                   step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, w, bandwidth, xDrop, zDrop, scoreFoler,
                   refFasta, gffFile, pvalues);
 }

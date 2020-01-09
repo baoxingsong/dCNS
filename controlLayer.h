@@ -76,24 +76,21 @@ void pairCns2Gaps(std::string & _input,  std::string & _reference, std::string &
 
 void weighted1Gap(std::string & _input,  std::string & _reference, std::string & _output,
                   int32_t & _matchingScore, int32_t & _mismatchingPenalty, int32_t & _openGapPenalty1,
-                  int32_t & _extendGapPenalty1, int32_t & _openGapPenalty2,
-                  int32_t & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+                  int32_t & _extendGapPenalty1, int32_t & _seed_window_size, int32_t & _mini_cns_score,
                   int32_t & _step_size, int32_t & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
                   const double & _kValue, int32_t & _bandwidth, int32_t & _w, const int32_t & _xDrop, const int32_t & _zDrop, const std::string & scoreFoler,
                   const std::string & refFasta, const std::string & gffFile, double & _pvalues);
 
 void weighted2Gaps(std::string & _input,  std::string & _reference, std::string & _output,
                    int & _matchingScore, int & _mismatchingPenalty, int & _openGapPenalty1,
-                   int & _extendGapPenalty1, int & _openGapPenalty2,
-                   int & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+                   int & _extendGapPenalty1, int32_t & _seed_window_size, int32_t & _mini_cns_score,
                    int32_t & _step_size, int & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
                    const double & _kValue, int & _w, const int32_t & bandwidth, const int & _xDrop, const int32_t & _zDrop, const std::string & scoreFoler,
                    const std::string & refFasta,  const std::string & gffFile, double & _pvalues);
 
 void cut1Gap(std::string & _input,  std::string & _reference, std::string & _output,
              int & _matchingScore, int & _mismatchingPenalty, int & _openGapPenalty1,
-             int & _extendGapPenalty1, int & _openGapPenalty2,
-             int & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+             int & _extendGapPenalty1, int32_t & _seed_window_size, int32_t & _mini_cns_score,
              int32_t & _step_size, int & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
              const double & _kValue, int & _w, const int & _xDrop,
              const std::string & refFasta, const std::string & queryFasta, double & _pvalues);

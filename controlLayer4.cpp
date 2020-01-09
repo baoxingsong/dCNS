@@ -48,7 +48,7 @@ double kValue = 0.006662;
 bool onlySyntenic = false;
 double pvalues = 0.1;
 
-int32_t w = 10;
+int32_t w = 10;  //this is the band width for band sequence alignments
 int32_t xDrop = 20;
 
 
@@ -249,7 +249,7 @@ int pairCnsXExtend(int argc, char** argv){
         " -B INT     Mismatching penalty (default: " << mismatchingPenalty << ")" << std::endl <<
         " -O INT     open gap penalty (default: " << openGapPenalty1 << ")" << std::endl <<
         " -E INT     extend gap penalty (default: " << extendGapPenalty1 << ")" << std::endl <<
-        " -u INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
+        " -u INT     xextend alignment band width (default: " << w << ")" << std::endl <<
         " -w INT     the windows size used to run the smith-waterman algorithm to get the alignment seed (default: "<<seed_window_size<<")" << std::endl <<
         //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
         " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
@@ -257,7 +257,6 @@ int pairCnsXExtend(int argc, char** argv){
         " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
         " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
-
 
     if( inputParser.cmdOptionExists("-A") ){
         matchingScore = std::stoi( inputParser.getCmdOption("-A") );
@@ -280,9 +279,6 @@ int pairCnsXExtend(int argc, char** argv){
     if( inputParser.cmdOptionExists("-w") ){
         seed_window_size = std::stoi( inputParser.getCmdOption("-w") );
     }
-//    if( inputParser.cmdOptionExists("-m") ){
-//        mini_cns_seed_size = std::stoi( inputParser.getCmdOption("-m") );
-//    }
     if( inputParser.cmdOptionExists("-c") ){
         mini_cns_score = std::stoi( inputParser.getCmdOption("-c") );
     }
@@ -322,7 +318,7 @@ void pairCns2Gaps(std::string & _input,  std::string & _reference, std::string &
                     int32_t & _extendGapPenalty1, int32_t & _openGapPenalty2,
                     int32_t & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
                     int32_t & _step_size, int32_t & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
-                    const double & _kValue, const int32_t & _w, const int32_t & bandwidth, const int32_t & _xDrop,
+                    const double & _kValue, const int32_t & _w, const int32_t & _bandwidth, const int32_t & _xDrop,
                     const int32_t & _zDrop, double & _pvalues){
 
     std::map<std::string, FastaMeta> metaInformations;
@@ -353,7 +349,7 @@ void pairCns2Gaps(std::string & _input,  std::string & _reference, std::string &
                                                            _matrix_boundary_distance, _openGapPenalty1, _extendGapPenalty1,
                                                            _openGapPenalty2, _extendGapPenalty2, _matchingScore,
                                                            _mismatchingPenalty, m, _step_size, seq1_string, seq2_string, _pvalues,
-                                                           _lambda, _kValue, _zDrop, bandwidth, _w, _xDrop);
+                                                           _lambda, _kValue, _zDrop, _bandwidth, _w, _xDrop);
 
             if (_onlySyntenic) {
                 std::vector<PairedSimilarFragment> pairedSimilarFragments = syntenic(pairedSimilarFragments0);
@@ -411,10 +407,10 @@ int pairCns2Gaps(int argc, char** argv){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
     }
     if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
+        openGapPenalty2 = std::stoi( inputParser.getCmdOption("-O2") );
     }
     if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
+        extendGapPenalty2 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-u") ){
         w = std::stoi( inputParser.getCmdOption("-u") );
@@ -468,8 +464,7 @@ int pairCns2Gaps(int argc, char** argv){
 
 void weighted1Gap(std::string & _input,  std::string & _reference, std::string & _output,
                   int32_t & _matchingScore, int32_t & _mismatchingPenalty, int32_t & _openGapPenalty1,
-                  int32_t & _extendGapPenalty1, int32_t & _openGapPenalty2,
-                  int32_t & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+                  int32_t & _extendGapPenalty1,  int32_t & _seed_window_size, int32_t & _mini_cns_score,
                   int32_t & _step_size, int32_t & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
                   const double & _kValue, int32_t & _bandwidth, int32_t & _w, const int32_t & _xDrop, const int32_t & _zDrop, const std::string & scoreFoler,
                   const std::string & refFasta, const std::string & gffFile, double & _pvalues){
@@ -515,8 +510,7 @@ void weighted1Gap(std::string & _input,  std::string & _reference, std::string &
                     findSimilarFragmentsForPairedSequence_wighted_1gap ( seq1, seq1_rev_com,
                                      seq2, seq2_rev_com, length1, length2, _seed_window_size,
                                      _mini_cns_score, _matrix_boundary_distance,
-                                     _openGapPenalty1, _extendGapPenalty1, _openGapPenalty2,
-                                     _extendGapPenalty2, _matchingScore, _mismatchingPenalty,
+                                     _openGapPenalty1, _extendGapPenalty1,  _matchingScore, _mismatchingPenalty,
                                      m, _step_size, seq1_string, seq2_string,
                                      _pvalues, _lambda, _kValue, _zDrop,
                                      _bandwidth, _w, _xDrop, score,
@@ -558,9 +552,9 @@ int weighted1Gap(int argc, char** argv){
           " -B INT     Mismatching penalty (default: " << mismatchingPenalty << ")" << std::endl <<
           " -O1 INT     open gap penalty (default: " << openGapPenalty1 << ")" << std::endl <<
           " -E1 INT     extend gap penalty (default: " << extendGapPenalty1 << ")" << std::endl <<
-          " -O2 INT     open gap penalty (default: " << openGapPenalty2 << ")" << std::endl <<
-          " -E2 INT     extend gap penalty (default: " << extendGapPenalty2 << ")" << std::endl <<
-          " -u INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
+//          " -O2 INT     open gap penalty (default: " << openGapPenalty2 << ")" << std::endl <<
+//          " -E2 INT     extend gap penalty (default: " << extendGapPenalty2 << ")" << std::endl <<
+          " -u INT     xextend alignment band width (default: " << w << ")" << std::endl <<
           //" - INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
           " -w INT     the windows size used to run the smith-waterman algorithm to get the alignment seed (default: "<<seed_window_size<<")" << std::endl <<
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
@@ -582,12 +576,6 @@ int weighted1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-E1") ){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
-    }
-    if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
-    }
-    if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-u") ){
         w = std::stoi( inputParser.getCmdOption("-u") );
@@ -629,7 +617,7 @@ int weighted1Gap(int argc, char** argv){
         std::string gffFile = inputParser.getCmdOption("-f");
 
         weighted1Gap(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-                     extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+                     extendGapPenalty1,seed_window_size, mini_cns_score,
                      step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, bandwidth, w, xDrop, zDrop, scoreFoler,
                      refFasta, gffFile, pvalues);
         return 0;
@@ -643,8 +631,7 @@ int weighted1Gap(int argc, char** argv){
 
 void weighted2Gaps(std::string & _input,  std::string & _reference, std::string & _output,
                   int32_t & _matchingScore, int32_t & _mismatchingPenalty, int32_t & _openGapPenalty1,
-                  int32_t & _extendGapPenalty1, int32_t & _openGapPenalty2,
-                  int32_t & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+                  int32_t & _extendGapPenalty1, int32_t & _seed_window_size, int32_t & _mini_cns_score,
                   int32_t & _step_size, int32_t & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
                   const double & _kValue, int32_t & _w, const int32_t & _bandwidth, const int32_t & _xDrop, const int32_t & _zDrop, const std::string & scoreFoler,
                   const std::string & refFasta,  const std::string & gffFile, double & _pvalues){
@@ -691,8 +678,7 @@ void weighted2Gaps(std::string & _input,  std::string & _reference, std::string 
                     findSimilarFragmentsForPairedSequence_wighted ( seq1, seq1_rev_com,
                             seq2, seq2_rev_com, length1, length2, _seed_window_size,
                             _mini_cns_score, _matrix_boundary_distance,
-                            _openGapPenalty1, _extendGapPenalty1, _openGapPenalty2,
-                            _extendGapPenalty2, _matchingScore, _mismatchingPenalty,
+                            _openGapPenalty1, _extendGapPenalty1, _matchingScore, _mismatchingPenalty,
                             m, _step_size, seq1_string, seq2_string,
                             _pvalues, _lambda, _kValue, _zDrop,
                             _bandwidth, _w, _xDrop, score,
@@ -734,8 +720,6 @@ int weighted2Gaps(int argc, char** argv){
           " -O1 INT    open gap penalty (default: " << openGapPenalty1 << ")" << std::endl <<
           " -E1 INT    extend gap penalty (default: " << extendGapPenalty1 << ")" << std::endl <<
           " -u INT     xextend alignment band width (default: " << w << ")" << std::endl <<
-          " -O2 INT    open gap penalty (default: " << openGapPenalty2 << ")" << std::endl <<
-          " -E2 INT    extend gap penalty (default: " << extendGapPenalty2 << ")" << std::endl <<
           " -u2 INT    z drop alignment band width (default: " << bandwidth << ")" << std::endl <<
           //" - INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
           " -w INT     the windows size used to run the smith-waterman algorithm to get the alignment seed (default: "<<seed_window_size<<")" << std::endl <<
@@ -758,12 +742,6 @@ int weighted2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-E1") ){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
-    }
-    if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
-    }
-    if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-u") ){
         w = std::stoi( inputParser.getCmdOption("-u") );
@@ -810,7 +788,7 @@ int weighted2Gaps(int argc, char** argv){
 
 
         weighted2Gaps(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-                     extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+                     extendGapPenalty1,  seed_window_size, mini_cns_score,
                      step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, w, bandwidth, xDrop, zDrop, scoreFoler,
                       refFasta, gffFile, pvalues);
         return 0;
@@ -1346,14 +1324,13 @@ void outputMasking(std::string _output, std::vector<PairedSimilarFragment> & pai
 
     }
     ofile.close();
-
     ofile2.close();
 }
 
+
 void cut1Gap(std::string & _input,  std::string & _reference, std::string & _output,
                    int32_t & _matchingScore, int32_t & _mismatchingPenalty, int32_t & _openGapPenalty1,
-                   int32_t & _extendGapPenalty1, int32_t & _openGapPenalty2,
-                   int32_t & _extendGapPenalty2, int32_t & _seed_window_size, int32_t & _mini_cns_score,
+                   int32_t & _extendGapPenalty1,  int32_t & _seed_window_size, int32_t & _mini_cns_score,
                    int32_t & _step_size, int32_t & _matrix_boundary_distance, bool & _onlySyntenic,  const double & _lambda,
                    const double & _kValue, int32_t & _w, const int32_t & _xDrop,
                    const std::string & refFasta, const std::string & queryFasta, double & _pvalues){
@@ -1362,7 +1339,6 @@ void cut1Gap(std::string & _input,  std::string & _reference, std::string & _out
 
     FastaWithIndex refFastaWithIndex(refFasta);
     FastaWithIndex queryFastaWithIndex(queryFasta);
-
 
     std::map<std::string, FastaMeta> metaInformations;
     std::map<std::string, std::string> sequences;
@@ -1382,10 +1358,6 @@ void cut1Gap(std::string & _input,  std::string & _reference, std::string & _out
     int8_t * seq1 = sequenceCharToUInt8.seq_to_int8(seq1_string);
     int8_t * seq1_rev_com = sequenceCharToUInt8.rev_comp(seq1, seq1_string.length());
     int32_t length1 = seq1_string.length();
-//    sequences0.clear();
-    //std::cout << "seq1_string:" << seq1_string << std::endl;
-
-
 
     for( std::string _query : seqNames ){
         if( _query.compare(_reference) != 0) {
@@ -1451,16 +1423,15 @@ int cut1Gap(int argc, char** argv){
           " -B INT     Mismatching penalty (default: " << mismatchingPenalty << ")" << std::endl <<
           " -O1 INT    open gap penalty (default: " << openGapPenalty1 << ")" << std::endl <<
           " -E1 INT    extend gap penalty (default: " << extendGapPenalty1 << ")" << std::endl <<
-          " -u INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
+          " -u INT     xextend alignment band width (default: " << w << ")" << std::endl <<
           //" - INT     xextend alignment band width (default: " << extendGapPenalty1 << ")" << std::endl <<
           " -w INT     the windows size used to run the smith-waterman algorithm to get the alignment seed (default: "<<seed_window_size<<")" << std::endl <<
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
-          " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
+/*          " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << */std::endl;
     InputParser inputParser (argc, argv);
-
 
     if( inputParser.cmdOptionExists("-A") ){
         matchingScore = std::stoi( inputParser.getCmdOption("-A") );
@@ -1473,12 +1444,6 @@ int cut1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-E1") ){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
-    }
-    if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
-    }
-    if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-u") ){
         w = std::stoi( inputParser.getCmdOption("-u") );
@@ -1515,7 +1480,7 @@ int cut1Gap(int argc, char** argv){
         std::string queryFasta = inputParser.getCmdOption("-qa");
 
         cut1Gap(input, reference, output, matchingScore, mismatchingPenalty, openGapPenalty1,
-                      extendGapPenalty1, openGapPenalty2, extendGapPenalty2, seed_window_size, mini_cns_score,
+                      extendGapPenalty1, seed_window_size, mini_cns_score,
                       step_size, matrix_boundary_distance, onlySyntenic, lambda, kValue, w, xDrop,
                       refFasta, queryFasta, pvalues);
         return 0;
@@ -1643,10 +1608,10 @@ int cut2Gaps(int argc, char** argv){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
     }
     if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
+        openGapPenalty2 = std::stoi( inputParser.getCmdOption("-O2") );
     }
     if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
+        extendGapPenalty2 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-u") ){
         w = std::stoi( inputParser.getCmdOption("-u") );
@@ -1836,10 +1801,10 @@ int cut2Gaps2(int argc, char** argv){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E1") );
     }
     if( inputParser.cmdOptionExists("-O2") ){
-        openGapPenalty1 = std::stoi( inputParser.getCmdOption("-O2") );
+        openGapPenalty2 = std::stoi( inputParser.getCmdOption("-O2") );
     }
     if( inputParser.cmdOptionExists("-E2") ){
-        extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E2") );
+        extendGapPenalty2 = std::stoi( inputParser.getCmdOption("-E2") );
     }
     if( inputParser.cmdOptionExists("-m") ){
         maximumAlignLength = std::stoi( inputParser.getCmdOption("-m") );
@@ -2148,11 +2113,9 @@ int multCns( int argc, char** argv ){
         onlySyntenic = str2bool( inputParser.getCmdOption("-y"), onlySyntenic );
     }
 
-
     if( inputParser.cmdOptionExists("-m") ){
         mini_cns_size = std::stoi( inputParser.getCmdOption("-m") );
     }
-
 
     if( inputParser.cmdOptionExists("-e") ){
         outputWithMinimumLengthPercentage = std::stod( inputParser.getCmdOption("-e") );
@@ -2252,7 +2215,6 @@ int slideWindow( int argc, char** argv ){
     if( inputParser.cmdOptionExists("-s") ){
         step_size = std::stoi( inputParser.getCmdOption("-s") );
     }
-
 
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
         std::cerr << usage.str();

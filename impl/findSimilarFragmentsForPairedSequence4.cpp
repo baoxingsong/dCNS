@@ -152,6 +152,7 @@ void getSeeds( int8_t * seq1, int8_t * seq2, int8_t * seq1_rev_com, int8_t * seq
         int32_t e1 = 1 + endPosition1< this_windowsSize+windowsSize? 1 + endPosition1 : this_windowsSize+windowsSize;
         int32_t e2 = 1 + endPosition2< this_windowsSize+windowsSize? 1 + endPosition2 : this_windowsSize+windowsSize;
         //int32_t oldMaxScore = maxScore;
+        // it should be possible to avoid run this round of smith waterman algorithm, but maybe would not save a lot of times
         SmithWaterman(seq1_rev_com + (length1 - 1 - endPosition1),
                       seq2_rev_com + (length2 - (startPosition2 + endPosition2) - 1),
                       e1, e2, _open_gap_penalty1, _extend_gap_penalty1, maxScore,
@@ -164,7 +165,8 @@ void getSeeds( int8_t * seq1, int8_t * seq2, int8_t * seq1_rev_com, int8_t * seq
         int32_t start1 = endPosition1-endPosition1_rc; //0-based coordinate
         int32_t start2 = startPosition2+endPosition2-endPosition2_rc; //0-based coordinate
 //        std::cout << "line 202 start1:" << start1 << " end1:" << end1 << " start2:" << start2 << " end2:" << end2 << " maxScore:" << maxScore << std::endl;
-        Seed seed0(start1, end1, start2 , end2); //to
+        Seed seed0(start1, end1, start2 , end2);
+
         if( seeds.find(seed0) == seeds.end()){
             seeds.insert(seed0);
             if( start1>= miniReferenceSize){
@@ -349,7 +351,7 @@ void getAllExtendSeed( int8_t * seq1, int8_t * seq1_rev_com,
                        const int32_t & _open_gap_penalty1, const int32_t & _extend_gap_penalty1, const int32_t & matchingScore,
                        const int32_t & mismatchingPenalty, const Scorei & m, const int32_t & step_size,
                        std::string & seq1_string, std::string & seq2_string, const double & pvalues,
-                       const double & lambda, const double & kValue, const int32_t & zDrop, const int32_t & bandwidth,
+                       const double & lambda, const double & kValue, const int32_t & zDrop,
                        const int32_t & w, const int32_t & xDrop,  std::vector<Seed> & x_extend_seeds ){
 
 
@@ -457,19 +459,17 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
 
     std::set<Seed> seeds;
     bool notEnd = true;
-    while( notEnd ) { // could not put == here, since the first one is startPosition2 + 0
-//        std::cout << "line 445 startPosition2:" << startPosition2 << std::endl;
+    while( notEnd ) {
         getSeeds(seq1, seq2, seq1_rev_com, seq2_rev_com, length1, length2, miniReferenceSize,
                  _open_gap_penalty1, _extend_gap_penalty1, matrix_boundary_distance,
                  startPosition2, mini_cns_score, windowsSize,
                  this_windowsSize_return, m, step_size, seeds);
-//        startPosition2 += (this_windowsSize_return - windowsSize  + step_size);
         startPosition2 += step_size;
         if( startPosition2 > length2 ){
             notEnd = false;
             break;
-        }if( (startPosition2 + windowsSize) > length2 ){
-//            std::cout << "line 451 startPosition2:" << startPosition2 << " windowsSize:" << windowsSize << std::endl;
+        }
+        if( (startPosition2 + windowsSize) > length2 ){
             getSeeds(seq1, seq2, seq1_rev_com, seq2_rev_com, length1, length2, miniReferenceSize,
                      _open_gap_penalty1, _extend_gap_penalty1, matrix_boundary_distance,
                      startPosition2, mini_cns_score, windowsSize,
@@ -760,7 +760,7 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
     getAllExtendSeed(seq1, seq1_rev_com, seq2, seq2_rev_com, length1, length2, windowsSize,
                      mini_cns_score, matrix_boundary_distance, _open_gap_penalty1, _extend_gap_penalty1,
                      matchingScore, mismatchingPenalty, m, step_size,
-                     seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, bandwidth, w,
+                     seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, w,
                      xDrop, x_extend_seeds );
     Matrix T(length1+1, length2 + 1);
     return findSimilarFragmentsForPairedSequence ( seq1, seq1_rev_com, seq2, seq2_rev_com, length1, length2, windowsSize,
@@ -780,8 +780,7 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
 std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence_wighted_1gap ( int8_t * seq1, int8_t * seq1_rev_com,
                        int8_t * seq2, int8_t * seq2_rev_com, int32_t & length1, int32_t & length2, int32_t & windowsSize,
                        const int32_t & mini_cns_score, const int32_t & matrix_boundary_distance,
-                       const int32_t & _open_gap_penalty1, const int32_t & _extend_gap_penalty1, const int32_t & _open_gap_penalty2,
-                       const int32_t & _extend_gap_penalty2, const int32_t & matchingScore, const int32_t & mismatchingPenalty,
+                       const int32_t & _open_gap_penalty1, const int32_t & _extend_gap_penalty1,  const int32_t & matchingScore, const int32_t & mismatchingPenalty,
                        const Scorei & m, const int32_t & step_size, std::string & seq1_string, std::string & seq2_string,
                        const double & pvalues, const double & lambda, const double & kValue, const int32_t & zDrop,
                        const int32_t & bandwidth, int32_t & w, const int32_t & xDrop, Score & score,
@@ -809,7 +808,7 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence_wighted
     getAllExtendSeed( seq1, seq1_rev_com, seq2, seq2_rev_com, length1, length2, windowsSize,
                       mini_cns_score, matrix_boundary_distance, _open_gap_penalty1, _extend_gap_penalty1,
                       matchingScore, mismatchingPenalty, m, step_size,
-                      seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, bandwidth, w,
+                      seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, w,
                       xDrop, x_extend_seeds );
 
 //    std::cout << "line 970:" << x_extend_seeds.size() << std::endl;
@@ -880,8 +879,7 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence_wighted
 std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence_wighted ( int8_t * seq1, int8_t * seq1_rev_com,
                                                                                    int8_t * seq2, int8_t * seq2_rev_com, int32_t & length1, int32_t & length2, int32_t & windowsSize,
                                                                                    const int32_t & mini_cns_score, const int32_t & matrix_boundary_distance,
-                                                                                   const int32_t & _open_gap_penalty1, const int32_t & _extend_gap_penalty1, const int32_t & _open_gap_penalty2,
-                                                                                   const int32_t & _extend_gap_penalty2, const int32_t & matchingScore, const int32_t & mismatchingPenalty,
+                                                                                   const int32_t & _open_gap_penalty1, const int32_t & _extend_gap_penalty1, const int32_t & matchingScore, const int32_t & mismatchingPenalty,
                                                                                    const Scorei & m, const int32_t & step_size, std::string & seq1_string, std::string & seq2_string,
                                                                                    const double & pvalues, const double & lambda, const double & kValue, const int32_t & zDrop,
                                                                                    const int32_t & bandwidth, int32_t & w,  const int32_t & xDrop, Score & score,
@@ -910,7 +908,7 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence_wighted
     getAllExtendSeed(seq1, seq1_rev_com, seq2, seq2_rev_com, reinterpret_cast<int32_t &>(length1), length2, windowsSize,
                      mini_cns_score, matrix_boundary_distance, _open_gap_penalty1, _extend_gap_penalty1,
                      matchingScore, mismatchingPenalty, m, step_size,
-                     seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, bandwidth, w,
+                     seq1_string, seq2_string, pvalues, lambda, kValue, zDrop, w,
                      xDrop, x_extend_seeds );
     for( Seed x_seed :  x_extend_seeds){
 
