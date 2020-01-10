@@ -70,3 +70,4 @@ int mainwe( int argc, char** argv ) {
 // K	0.620991	0.46
 // H	1.12409	0.85
 
+//TODO for those failed extension alignment result, should try to use a larger band width

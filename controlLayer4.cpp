@@ -473,7 +473,6 @@ void weighted1Gap(std::string & _input,  std::string & _reference, std::string &
 
     Scorei m(_matchingScore, _mismatchingPenalty);
 
-
     std::map<std::string, std::string> sequences;
     std::vector<std::string> seqNames;
     readFastaFile( _input, sequences, metaInformations, seqNames );
