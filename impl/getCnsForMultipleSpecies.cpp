@@ -436,7 +436,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                                 std::map<std::string, std::string> & samFiles,/*species, sameFile*/
                                 std::string & referenceGenomeFile,
                                 const int32_t & minimumNumberOfSpecies, const int32_t & mini_cns_size,
-                                const double & outputWithMinimumLengthPercentage){
+                                const double & outputWithMinimumLengthPercentage, bool onlyPickOneSequenceForEachSamForMSA){
 
     std::map<std::string, std::string> referenceGenome;
     readFastaFile( referenceGenomeFile, referenceGenome);
@@ -578,7 +578,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
     ofile.open(output);
     for( std::map <std::string, std::vector<std::vector<PairedSimilarFragment2>>>::iterator it=pairedSimilarFragments1.begin(); it!=pairedSimilarFragments1.end(); ++it ) {
         std::string referenceChr = it->first;
-        std::cout << referenceChr << std::endl;
+        std::cout << "referenceChr:" << referenceChr << std::endl;
         std::vector<std::vector<PairedSimilarFragment2>> allPairedSimilarFragments = it->second; // each vector is the CNS in each species
 
         //sort according to the reference coordinate begin //remember those have been sorted, should be used for speeding up
@@ -587,6 +587,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                       [](PairedSimilarFragment2 a, PairedSimilarFragment2 b) {
                           return a.getStart1() < b.getStart1();
                       });
+//            std::cout << i << " size:" << allPairedSimilarFragments[i].size() << std::endl;
         }
         //sort according to the reference coordinate end
 
@@ -612,7 +613,9 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                 // set all the if overlap values begin
                 for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
                     if (j == ai) {
-                        overlapped[j].resize(allPairedSimilarFragments[j].size(), false); // only use 1 in this accession
+                        for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+                            overlapped[j][k] = false; // only use 1 in this accession
+                        }
                         overlapped[j][i] = true;
                     } else {
                         for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
@@ -633,37 +636,50 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                 }
                 // set all the if overlap values end
 
-
-                // only keep one CNS for each species, else it would take too much RAM and CPU time
-                // if you have 10 species, and for 8 species, there are 1000 CNS overlapped with the one taking as reference
-                // the size of the index combination matrix would be 1000^8, take huge RAM. And the computing for all of those combinations would take a lot of time
-                // for pratical purpose, for each species we only select the one which give longest overlap with the reference CNS
-                for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
-                    if (j != ai) {
-                        int32_t longest_length = 0;
-                        int32_t longest_index = -1;
-                        for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
-                            if( overlapped[j][k] ){
-                                int32_t thisRefStart = allPairedSimilarFragments[ai][i].getStart1() > allPairedSimilarFragments[j][k].getStart1() ? allPairedSimilarFragments[ai][i].getStart1() : allPairedSimilarFragments[j][k].getStart1();
-                                int32_t thisRefEnd = allPairedSimilarFragments[ai][i].getEnd1() < allPairedSimilarFragments[j][k].getEnd1() ? allPairedSimilarFragments[ai][i].getEnd1() : allPairedSimilarFragments[j][k].getEnd1();
-                                int32_t thisRefLength = thisRefEnd - thisRefStart + 1;
-                                if( thisRefLength > longest_length ){
-                                    longest_length = thisRefLength;
-                                    longest_index = k;
+                if(onlyPickOneSequenceForEachSamForMSA){
+                    // only keep one CNS for each species, else it would take too much RAM and CPU time
+                    // if you have 10 species, and for 8 species, there are 1000 CNS overlapped with the one taking as reference
+                    // the size of the index combination matrix would be 1000^8, take huge RAM. And the computing for all of those combinations would take a lot of time
+                    // for pratical purpose, for each species we only select the one which give longest overlap with the reference CNS
+                    for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
+                        if (j != ai) {
+                            int32_t longest_length = 0;
+                            int32_t longest_index = -1;
+                            for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+                                if( overlapped[j][k] ){
+                                    int32_t thisRefStart = allPairedSimilarFragments[ai][i].getStart1() > allPairedSimilarFragments[j][k].getStart1() ? allPairedSimilarFragments[ai][i].getStart1() : allPairedSimilarFragments[j][k].getStart1();
+                                    int32_t thisRefEnd = allPairedSimilarFragments[ai][i].getEnd1() < allPairedSimilarFragments[j][k].getEnd1() ? allPairedSimilarFragments[ai][i].getEnd1() : allPairedSimilarFragments[j][k].getEnd1();
+                                    int32_t thisRefLength = thisRefEnd - thisRefStart + 1;
+                                    if( thisRefLength > longest_length ){
+                                        longest_length = thisRefLength;
+                                        longest_index = k;
+                                    }
+                                    overlapped[j][k] = false;
                                 }
                             }
+                            if( longest_index > -1 ){
+                                overlapped[j][longest_index] = true;
+                            }
                         }
-                        overlapped[j].resize(allPairedSimilarFragments[j].size(), false);
-                        overlapped[j][longest_index] = true;
                     }
                 }
-
+//                std::cout << "line 666" << std::endl;
                 std::vector<std::vector<int32_t>> allCombinations = generateAllCombinations(overlapped);  // matrix size: ### X (n-2)
                 // the size should be one now
-
+//                std::cout << "line 664 allCombinations size:" << allCombinations.size() << std::endl;
                 //overlapped has the same size with allPairedSimilarFragments
+//
+//                for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
+//                    for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+//                        if( overlapped[j][k] ){
+//                            std::cout << "j: " << j << " k: " << k << std::endl;
+//                        }
+//                    }
+//                }
+
                 std::vector<int32_t> combination(allCombinations.size(), -1);
                 while (getNext(allCombinations, combination)) {
+  //                  std::cout << "line 682 combination size :" << combination.size() << std::endl;
                     // if this combination has been checked, do not repeat it begin
                     Combination c(combination);
                     if (allCombinationsSetUsed.find(c) != allCombinationsSetUsed.end()) {

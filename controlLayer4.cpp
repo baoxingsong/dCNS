@@ -2104,6 +2104,7 @@ int multCns( int argc, char** argv ){
           //" -c INT     minimum number of species" << std::endl <<
           " -e DOUBLE  minimum out put of the full out put fragment length" << std::endl <<
           " -p INT     the minimum number of non-reference species that should contain similar fragment for output (default:"<< minimumNumberOfSpecies<<")" << std::endl <<
+          " -n bool    use only single sequence overlapping with reference (default: false)" << std::endl <<
           " -y bool    only output syntenic result (default: false)" << std::endl;
     InputParser inputParser (argc, argv);
 
@@ -2122,6 +2123,11 @@ int multCns( int argc, char** argv ){
 
     if( inputParser.cmdOptionExists("-p") ){
         minimumNumberOfSpecies = std::stoi( inputParser.getCmdOption("-p") );
+    }
+
+    bool onlyPickOneSequenceForEachSamForMSA  = false;
+    if( inputParser.cmdOptionExists("-n") ){
+        onlyPickOneSequenceForEachSamForMSA = str2bool( inputParser.getCmdOption("-n"), onlySyntenic );
     }
 
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
@@ -2150,12 +2156,11 @@ int multCns( int argc, char** argv ){
             }
             samFiles[filename] = file;
         }
-
         getCnsForMultipleSpecies (  onlySyntenic, output,
                 //std::map<std::string, std::string> & sequences, /*species, fastaFile*/
                 samFiles,/*species, sameFile*/
                 referenceGenomeFile, minimumNumberOfSpecies, mini_cns_size,
-                outputWithMinimumLengthPercentage);
+                outputWithMinimumLengthPercentage, onlyPickOneSequenceForEachSamForMSA);
 
         return 0;
     }else{
