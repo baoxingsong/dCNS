@@ -1240,6 +1240,12 @@ void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
             e += _extend_gap_penalty;
             e  = e >= h? e  : h;
         }
+        if( thisMaxj != length2 && thisMaxj != 1 && (thisMaxj == start ||  thisMaxj == end) ){
+            int32_t thisw = 2*w;
+            SemiGlobal_xextend(seq1, seq2, length1, length2, _open_gap_penalty, _extend_gap_penalty, maxScore,
+                    endPosition1, endPosition2, m, xdrop, thisw);
+            return;
+        }
         if( thisMax > maxScore ){ // please do not change > to >=, since we are doing local alignment
             // >= will omit the first similar fragments
             maxScore = thisMax;
@@ -1330,6 +1336,11 @@ std::vector<uint32_t> SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32
             e = e >= h ? e : h;
 
             T.set(i, j, d);
+        }
+        if( thisMaxj != length2 && thisMaxj != 1 && (thisMaxj == start ||  thisMaxj == end) ){
+            int32_t thisw = 2*w;
+            return SemiGlobal_xextend(seq1, seq2, length1, length2, _open_gap_penalty, _extend_gap_penalty, maxScore,
+                    endPosition1, endPosition2, m, xdrop, thisw, T, iii, jjj);
         }
 
         if( thisMax > maxScore ){ // please do not change > to >=, since we are doing local alignment

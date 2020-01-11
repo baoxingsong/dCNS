@@ -2100,14 +2100,14 @@ int multCns( int argc, char** argv ){
           //" -g FILE    query genome files in fasta format" << std::endl <<
           " -s FILEs   sam files output of any pairwise approach" << std::endl <<
           " -o FILE    output file in fasta format" << std::endl <<
-          " -m FILE    minimum output size" << std::endl <<
+          " -m FILE    minimum output size (default:" << mini_cns_size << ")" << std::endl <<
           //" -c INT     minimum number of species" << std::endl <<
           " -e DOUBLE  minimum out put of the full out put fragment length" << std::endl <<
           " -p INT     the minimum number of non-reference species that should contain similar fragment for output (default:"<< minimumNumberOfSpecies<<")" << std::endl <<
-          " -n bool    use only single sequence overlapping with reference (default: false)" << std::endl <<
+          " -n bool    use only single sequence overlapping with reference (default: true)" << std::endl <<
+          "            if setting it as false, it might cost a lot of RAM and CPU time" << std::endl <<
           " -y bool    only output syntenic result (default: false)" << std::endl;
     InputParser inputParser (argc, argv);
-
 
     if( inputParser.cmdOptionExists("-y") ){
         onlySyntenic = str2bool( inputParser.getCmdOption("-y"), onlySyntenic );
@@ -2125,7 +2125,7 @@ int multCns( int argc, char** argv ){
         minimumNumberOfSpecies = std::stoi( inputParser.getCmdOption("-p") );
     }
 
-    bool onlyPickOneSequenceForEachSamForMSA  = false;
+    bool onlyPickOneSequenceForEachSamForMSA  = true;
     if( inputParser.cmdOptionExists("-n") ){
         onlyPickOneSequenceForEachSamForMSA = str2bool( inputParser.getCmdOption("-n"), onlySyntenic );
     }

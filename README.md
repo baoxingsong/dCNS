@@ -1,5 +1,5 @@
 # dCNS
-A k-mer free and dynamic programming sequence alignment approach to detect CNS elements.
+A sensitive sequence alignment approach to detect CNS elements by using a k-mer free and dynamic programming sequence alignment strategy.
 
 
 
@@ -15,28 +15,26 @@ usage and parameters are available from the command line.
 
 #### About the default parameters:
 
-Majority of the sequence alignment parameters are related with each other. If you want to change a single parameter, other parameters might should be adjusted accordingly.
+**The majority of the sequence alignment parameters are related to each other. If you want to change a single parameter, other parameters should be adjusted accordingly.**
 
-Here explains how did we optimize the parameters for the sequence alignment of andropogoneae non-coding sequence. If you are working different population, the default parameters might does not work very well.
+Here explains how did we optimize the parameters for the sequence alignment of *Andropogoneae* non-coding sequence. If you are working with a different population, the default parameters might do not work very well.
 
-The match score, mis-match, open gap penalty, extend gap penalty was modified from minimap2 parameters by keeping in mind the high diversity of the andropogoneae non-coding regions. We fit the score distribution into a non-linear model using the non-linear least square model to test do those parameters work for our data.
+The match score, mis-match, open gap penalty, extend gap penalty was modified from minimap2 parameters by keeping in mind the high diversity of the *Andropogoneae* non-coding regions. We fit the score distribution into a non-linear model using the non-linear least square model to test if those parameters work for our data. The non-linear least square model is available as an R script in the release.
 
-The k and lambda are used for p-value calculation, they were calculated using a non-linear least square regression approach with smith-waterman scores of random sequence fragments. 
+The k and lambda are used for p-value calculation, and they were calculated using a non-linear least square regression approach with smith-waterman scores of random sequence fragments.
 
-Random sampling was performed between maize and sorghum, sugarcane, miscanthus, setaria. All the pair-wise species gave similar k and lambda estimations. The default k and lambda parameters were determined using maize against sequence extract from all the other 4 species randomly.
+Random sampling was performed between maize and sorghum, sugarcane, Miscanthus, Setaria. All the pair-wise species gave similar k and lambda estimations. The default k and lambda parameters were determined using maize as the reference against sequence extract from all the other four species randomly.
 
 The zDrop value allows a large gap and a few of nearby penalties.
 
 The w and xDrop values were set by referring parameters in the example code of Seqan library.
 
-The significant smith-waterman score should be ~54, we used a smith-waterman score 40 as a minimum score of seed. The seed window size 38 was selected to make sure there is only one seed in each window. The step_size value 8 to make sure there is no seed missing for each window sliding. The openGapPenalty2 value -45 basing on the guess that the normal gap are in general  <20bp and TEs are >25bp
- 
+In our dataset, the significant smith-waterman score should be ~54, and we used a smith-waterman score 40 as a minimum score of seed. The seed window size 38 was selected to make sure there is only one seed in each window. The step_size value 8 to make sure there is no seed missing for each window sliding. The openGapPenalty2 value -45 basing on the guess that the normal gap is in general <20bp and TEs are >25bp
 
 K-mer masking, we used 20-mer, since 20 is the minimum seed size. (40/2), 40 is the minimum seed score, 2 is the match score.
 
-
 ## If run dCNS on different machine
-It is good to recompile the code, if you run it on different machine. dCNS uses hardware instructions (SSE4 and AVX2) to speed up.
+It is good to recompile the code for each machine, if you run it on different machine. dCNS uses hardware instructions (SSE4 and AVX2) to speed up.
 
 ## Run dCNS under docker
 
@@ -138,10 +136,15 @@ reformat sam file into bam file
 cat 5.sam| sort | uniq >5_uniq.sam
 samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
 ```
+## Multiple sequence alignment
+If you are interested in multiple sequence alignment, Firstly, you should perform pair-wise sequence alignment for each species against reference species.
+Give each sam file a unique name. And use this command to generate multiple sequence alignment.
+`dCNS multCns -i Zea_mays.AGPv4.dna.toplevel.fa -o msa.fasta -s sorghum.sam setaria.sam miscanthus.sam sugarcane.sam 1013.sam 1025.sam`
 
+## OUTPUT
 The output file is in sam format, and it works with majority functions implemented in tools compatible with sam format.
-The 5th column is the sequence alignment score, there would be some information lost it convert the sam files into bam files.
-The 6th column is always start with regex `[0-9]+H` , which tells the coordinate where query sequence alignment start from, the value is 1 based coordinate.
+The 5th column is the sequence alignment score. There would be some information lost when converting the sam files into bam files.
+The 6th column is always start with regex `[0-9]+H` , which tells the coordinate where query sequence alignment starts from, the value is 1 based coordinate.
 
 # Citation
 The dCNS manuscript is under preparation

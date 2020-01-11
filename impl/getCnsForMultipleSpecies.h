@@ -28,8 +28,8 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
                                 const double & kValue, const int32_t & w, const int32_t & xDrop);
 
 void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & output,
-                                std::map<std::string, std::string> & sequences, /*species, fastaFile*/
-                                std::map<std::string, std::string> & samFiles,/*species, sameFile*/
+                                std::map<std::string, std::string> & sequences, //*species, fastaFile
+                                std::map<std::string, std::string> & samFiles,//species, sameFile
                                 std::string & referenceGenomeFile,
                                 const int32_t & minimumNumberOfSpecies, const int32_t & mini_cns_size,
                                 const double & outputWithMinimumLengthPercentage);

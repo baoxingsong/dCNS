@@ -102,6 +102,8 @@ bool getNext( const std::vector< std::vector<int>> & allCombinations, std::vecto
     }
 }
 
+//todo there are bug with this function, should update it according to the last one
+
 void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<int32_t> & lengths,
                                 int32_t & windowsSize, int32_t & mini_cns_seed_size, int32_t & mini_cns_score,
                                 const int32_t & matrix_boundary_distance, const int32_t & _open_gap_penalty,
@@ -191,11 +193,10 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
         overlapped[i].resize(allPairedSimilarFragments[i].size(), false);
     }
     for ( int32_t ai=0; ai< allPairedSimilarFragments.size(); ++ai ) {
-        /**
-         * If there are multiple records in the 3,4,...n species that overlapped with the record in the 2(second) one.
-         * Firstly only care about the first overlapped one, then take the second third .... overlapping as reference to run everything again
-         * **/
 
+//        If there are multiple records in the 3,4,...n species that overlapped with the record in the 2(second) one.
+//        Firstly only care about the first overlapped one, then take the second third .... overlapping as reference to run everything again
+//
         for (int32_t i=0; i <allPairedSimilarFragments[ai].size(); ++i) {
             // the alignment must present in the reference, maybe not good
             // BUT ED suggest it make no sense to detect CNS no present in the reference sequence
@@ -227,9 +228,15 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
 
             //overlapped has the same size with allPairedSimilarFragments
             std::vector<int> combination(allCombinations.size(), -1);
+            std::vector<int32_t> combinationi(allCombinations.size(), -1);
             while (getNext(allCombinations, combination)) {
+                for( int ci=0; ci<combination.size(); ++ci){
+                    std::cout << "ci:" << allCombinations[ci][combination[ci]] << std::endl;
+                    combinationi[ci] = allCombinations[ci][combination[ci]];
+                }
+
                 // if this combination has been checked, do not repeat it begin
-                Combination c(combination);
+                Combination c(combinationi);
                 if (allCombinationsSetUsed.find(c) != allCombinationsSetUsed.end()) {
 //                    std::cout << "line 192" << std::endl;
                     continue;
@@ -267,7 +274,7 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
                                     }
                                 }
                             }
-                            if (species.size() >=minimumNumberOfSpecies && thisNumberOfSequences >= minimumNumberOfSpecies /*&& thisNumberOfSpecies > numberOfSpecies*/ ) {
+                            if (species.size() >=minimumNumberOfSpecies && thisNumberOfSequences >= minimumNumberOfSpecies ) { //&& thisNumberOfSpecies > numberOfSpecies ) {
                                 refStart = start;
                                 refEnd = end;
                                 length = newLength;
@@ -428,8 +435,6 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
 
 
 
-//todo set a parameter for each species, the maximum number of align records should be used for MSA
-// should set up a score or something like that
 //take sam files as input
 void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & output,
                                 //std::map<std::string, std::string> & sequences, /*species, fastaFile*/
@@ -640,7 +645,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                     // only keep one CNS for each species, else it would take too much RAM and CPU time
                     // if you have 10 species, and for 8 species, there are 1000 CNS overlapped with the one taking as reference
                     // the size of the index combination matrix would be 1000^8, take huge RAM. And the computing for all of those combinations would take a lot of time
-                    // for pratical purpose, for each species we only select the one which give longest overlap with the reference CNS
+                    // for practical purpose, for each species we only select the one which give longest overlap with the reference CNS
                     for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
                         if (j != ai) {
                             int32_t longest_length = 0;
@@ -678,12 +683,18 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
 //                }
 
                 std::vector<int32_t> combination(allCombinations.size(), -1);
+                std::vector<int32_t> combinationi(allCombinations.size(), -1);
                 while (getNext(allCombinations, combination)) {
-  //                  std::cout << "line 682 combination size :" << combination.size() << std::endl;
+                    for( int ci=0; ci<combination.size(); ++ci){
+//                        std::cout << "ci:" << allCombinations[ci][combination[ci]] << std::endl;
+                        combinationi[ci] = allCombinations[ci][combination[ci]];
+                    }
+
+//                    std::cout << "line 682 combination size :" << combination.size() << std::endl;
                     // if this combination has been checked, do not repeat it begin
-                    Combination c(combination);
+
+                    Combination c(combinationi);
                     if (allCombinationsSetUsed.find(c) != allCombinationsSetUsed.end()) {
-                        //                    std::cout << "line 192" << std::endl;
                         continue;
                     }
                     allCombinationsSetUsed.insert(c);
