@@ -254,6 +254,8 @@ int pairCnsXExtend(int argc, char** argv){
         //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
         " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
         " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+        " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+        " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
         " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
         " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -287,6 +289,12 @@ int pairCnsXExtend(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -389,6 +397,8 @@ int pairCns2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -435,6 +445,12 @@ int pairCns2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -559,6 +575,8 @@ int weighted1Gap(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -596,6 +614,12 @@ int weighted1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -725,6 +749,8 @@ int weighted2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -765,6 +791,12 @@ int weighted2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -1428,6 +1460,8 @@ int cut1Gap(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
 /*          " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << */std::endl;
     InputParser inputParser (argc, argv);
@@ -1464,6 +1498,12 @@ int cut1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
 
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
@@ -1590,6 +1630,8 @@ int cut2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -1632,6 +1674,12 @@ int cut2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );

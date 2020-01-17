@@ -1,5 +1,5 @@
 # dCNS
-A sensitive sequence alignment approach to detect CNS elements by using a k-mer free and dynamic programming sequence alignment strategy.
+A sensitive sequence alignment implementation to detect conserved non-coding sequence (CNS) elements by using a k-mer free and dynamic programming sequence alignment strategy.
 
 
 
@@ -136,15 +136,19 @@ reformat sam file into bam file
 cat 5.sam| sort | uniq >5_uniq.sam
 samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
 ```
-## Multiple sequence alignment
-If you are interested in multiple sequence alignment, Firstly, you should perform pair-wise sequence alignment for each species against reference species.
-Give each sam file a unique name. And use this command to generate multiple sequence alignment.
-`dCNS multCns -i Zea_mays.AGPv4.dna.toplevel.fa -o msa.fasta -s sorghum.sam setaria.sam miscanthus.sam sugarcane.sam 1013.sam 1025.sam`
 
 ## OUTPUT
 The output file is in sam format, and it works with majority functions implemented in tools compatible with sam format.
 The 5th column is the sequence alignment score. There would be some information lost when converting the sam files into bam files.
 The 6th column is always start with regex `[0-9]+H` , which tells the coordinate where query sequence alignment starts from, the value is 1 based coordinate.
+
+## Multiple sequence alignment
+If you are interested in multiple sequence alignment, Firstly, you should perform pair-wise sequence alignment for each species against reference species.
+Give each sam file a unique name. And use this command to generate multiple sequence alignment.
+`dCNS multCns -i Zea_mays.AGPv4.dna.toplevel.fa -o msa.fasta -s sorghum.sam setaria.sam miscanthus.sam sugarcane.sam 1013.sam 1025.sam`
+
+# Funding
+This work is funded by NSF #1822330
 
 # Citation
 The dCNS manuscript is under preparation
