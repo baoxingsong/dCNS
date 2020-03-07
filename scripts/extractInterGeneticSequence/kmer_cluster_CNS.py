@@ -209,18 +209,17 @@ file = ["./sequences_with_tag1",
 
 
 file = ["./chr8_sequences_with_tag_1",
-        "./chr8_sequences_with_tag_4",
+        "./chr8_sequences_with_tag_3",
         "./chr8_sequences_with_tag_5",
-        "./chr8_sequences_with_tag_6",
         "./chr8_sequences_with_tag_7",
+        "./chr8_sequences_with_tag_17",
+        "./chr8_sequences_with_tag_19",
+        "./chr8_sequences_with_tag_21",
+        "./chr8_sequences_with_tag_23",
         "./chr8_sequences_with_tag_TE"]
 
-
-file = ["./sequences_with_tag_1"]
-
 regions = {}
-color_vector = ['r','b','g','y','c','m','k'] #use this vector for non-genic regions - repeats black
-
+color_vector = ['r','r','r','r', 'g','r','r','r', 'k'] #use this vector for non-genic regions - repeats black
 
 i = 0
 for filepath in file:

@@ -706,16 +706,13 @@ std::vector<uint32_t> SemiGlobal_no_avx(int8_t *seq1, int8_t *seq2, const int32_
     endPosition2 = -1;
 
     maxScore = 0;
-    int32_t e1, e2;
+    int32_t e1, e2, start, end, thisMax, thisMaxj, l;
     for ( i=1; i<=length1; ++i ){
-        int32_t thisMax = 0;
-        int32_t thisMaxj = 0;
+        thisMax = 0;
+        thisMaxj = 0;
 
-        int32_t start = i - w;
-        start = start <1 ? 1: start;
-
-        int32_t end = i + w;
-        end = end > length2 ? length2 : end;
+        start = i - w > 1 ? i - w : 1;
+        end = i + w < length2 ?  i + w : length2;
 
         e1 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
         e2 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
@@ -846,19 +843,21 @@ std::vector<uint32_t> SemiGlobal_no_avx(int8_t *seq1, int8_t *seq2, const int32_
             maxScore = thisMax;
             endPosition1=i; // this means the endPosition1 and endPosition2 is 1 based coordinate
             endPosition2=thisMaxj;
-        }else if( thisMaxj > endPosition2 && i > endPosition1 ){
-            int32_t l = (i - endPosition1) - (thisMaxj-endPosition2);
+        }//else if( thisMaxj > endPosition2 && i > endPosition1 ){
+            l = (i - endPosition1) - (thisMaxj-endPosition2);
             l = l>0 ? l : -l;
             if( maxScore-thisMax > zdrop + l * _extend_gap_penalty2) {
                 break;
             }
-        }
+        //}
         if ( thisMaxj<=0 ){
             break;
         }
         t = M1;
         M1 = M2;
         M2 = t;
+        M1[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
+        M2[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
     }
 
     std::vector<uint32_t> cigar;
@@ -1189,6 +1188,47 @@ std::vector<uint32_t> mapCnsToGenome(int8_t *seq1, int8_t *seq2, const int32_t &
 
 
 
+// this is a gapless alignment extension approach, and do not return cigar
+void gapless_extend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
+                        const int32_t &length2, int32_t &maxScore,
+                        int32_t &endPosition1, int32_t &endPosition2, const Scorei & m){// not sure this band approach and avx which is faster
+
+    int32_t length = length2 < length1 ? length2 : length1;
+    int32_t i, j, currentScore=maxScore, mscore;
+    int32_t thisMaxi=0;
+    for ( i=1; i<=length; ++i ){
+        currentScore += m.getScore(seq1[i-1], seq2[i-1]);
+        if( currentScore > maxScore ){
+            maxScore = currentScore;
+            thisMaxi = i;
+        }else if( currentScore < maxScore + 3* m.getScore(1, 2)){ //m.getScore(1, 2) is a mismatch
+            break;
+        }
+    }
+    endPosition1 += thisMaxi;
+    endPosition2 += thisMaxi;
+}
+/*
+void gapless_extend(int8_t *seq1, int8_t *seq2, int32_t &maxScore, const int8_t & yDrop,
+                    int32_t & start1, int32_t & end1, int32_t & start2, int32_t & end2, const Scorei & m){// not sure this band approach and avx which is faster
+
+    int32_t length = length2 < length1 ? length2 : length1;
+    int32_t i, j, currentScore=maxScore, mscore;
+    int32_t thisMaxi=0;
+    for ( i=1; i<=length; ++i ){
+        currentScore += m.getScore(seq1[i-1], seq2[i-1]);
+        if( currentScore > maxScore ){
+            maxScore = currentScore;
+            thisMaxi = i;
+        }else if( currentScore < maxScore + 3* m.getScore(1, 2)){ //m.getScore(1, 2) is a mismatch
+            break;
+        }
+    }
+    endPosition1 += thisMaxi;
+    endPosition2 += thisMaxi;
+}
+*/
+
 
 // this is a x-drop sequence alignment extension approach, and do not return cigar
 void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
@@ -1241,22 +1281,30 @@ void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
             e += _extend_gap_penalty;
             e  = e >= h? e  : h;
         }
+        if( thisMaxj != length2 && thisMaxj != 1 && (thisMaxj == start ||  thisMaxj == end) ){
+            int32_t thisw = 2*w;
+            SemiGlobal_xextend(seq1, seq2, length1, length2, _open_gap_penalty, _extend_gap_penalty, maxScore,
+                    endPosition1, endPosition2, m, xdrop, thisw);
+            return;
+        }
         if( thisMax > maxScore ){ // please do not change > to >=, since we are doing local alignment
             // >= will omit the first similar fragments
             maxScore = thisMax;
             endPosition1=i; // this means the endPosition1 and endPosition2 is 1 based coordinate
             endPosition2=thisMaxj;
-        }else if( thisMaxj > endPosition2 && i > endPosition1 ){
+        }//else if( thisMaxj > endPosition2 && i > endPosition1 ){
             if( maxScore-thisMax > xdrop ) {
                 break;
             }
-        }
+        //}
         if ( thisMax<=0 ){
             break;
         }
         t = M1;
         M1 = M2;
         M2 = t;
+        M1[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
+        M2[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
     }
     delete[] M1;
     delete[] M2;
@@ -1330,23 +1378,30 @@ std::vector<uint32_t> SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32
 
             T.set(i, j, d);
         }
+        if( thisMaxj != length2 && thisMaxj != 1 && (thisMaxj == start ||  thisMaxj == end) ){
+            int32_t thisw = 2*w;
+            return SemiGlobal_xextend(seq1, seq2, length1, length2, _open_gap_penalty, _extend_gap_penalty, maxScore,
+                    endPosition1, endPosition2, m, xdrop, thisw, T, iii, jjj);
+        }
 
         if( thisMax > maxScore ){ // please do not change > to >=, since we are doing local alignment
             // >= will omit the first similar fragments
             maxScore = thisMax;
             endPosition1=i; // this means the endPosition1 and endPosition2 is 1 based coordinate
             endPosition2=thisMaxj;
-        }else if( thisMaxj > endPosition2 && i > endPosition1 ){
+        }//else if( thisMaxj > endPosition2 && i > endPosition1 ){   // the idea here is, even the maximum is too small, all the values in the desired area are too small
             if( maxScore-thisMax > xdrop) {
                 break;
             }
-        }
+        //}
         if ( thisMaxj<=0 ){
             break;
         }
         t = M1;
         M1 = M2;
         M2 = t;
+        M1[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
+        M2[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
     }
 //    std::cout << "line 861 endPosition1 " << endPosition1 << " endPosition2: " << endPosition2 << " maxScore: " << maxScore << std::endl;
     std::vector<uint32_t> cigar;
@@ -1457,6 +1512,7 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
     int32_t thisMaxj;
     int32_t start;
     int32_t end;
+    int32_t l;
     for ( i=1; i<=length1; ++i ){
         thisMax = 0;
         thisMaxj = SCORE_OUT_BANDED_ALIGNMENT_REGION;
@@ -1565,19 +1621,21 @@ std::vector<uint32_t> SemiGlobal(int8_t *seq1, int8_t *seq2, const int32_t &leng
             maxScore = thisMax;
             endPosition1=i; // this means the endPosition1 and endPosition2 is 1 based coordinate
             endPosition2=thisMaxj;
-        }else if ( thisMaxj > endPosition2 && i > endPosition1 ){
-            int32_t l = (i - endPosition1) - (thisMaxj-endPosition2);
+        }//else if ( thisMaxj > endPosition2 && i > endPosition1 ){
+            l = (i - endPosition1) - (thisMaxj-endPosition2);
             l = l>0 ? l : -l;
             if( maxScore-thisMax > zdrop + l * _extend_gap_penalty2) {
                 break;
             }
-        }
+       // }
         if ( thisMaxj<=0 ){
             break;
         }
         t = M1;
         M1 = M2;
         M2 = t;
+        M1[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
+        M2[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
     }
 
     std::vector<uint32_t> cigar;
@@ -1689,7 +1747,7 @@ std::vector<uint32_t> SemiGlobal_single_gap_penalty(int8_t *seq1, int8_t *seq2, 
         e1 = SCORE_OUT_BANDED_ALIGNMENT_REGION;
 
         F[end] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
-        if( weights[i-1] == weights[i-2] && i>1 ){
+        if( weights[i-1] == weights[i-2] && i>1 ){  // if this one is same with last one, we do not need to change parameters
 
         }else{
             _open_gap_penalty1 = score.getOpenGapPenalty1(weights[i-1]);
@@ -1752,17 +1810,19 @@ std::vector<uint32_t> SemiGlobal_single_gap_penalty(int8_t *seq1, int8_t *seq2, 
             maxScore = thisMax;
             endPosition1=i; // this means the endPosition1 and endPosition2 is 1 based coordinate
             endPosition2=thisMaxj;
-        }else if( thisMaxj > endPosition2 && i > endPosition1 ){
+        }//else if( thisMaxj > endPosition2 && i > endPosition1 ){
             if( maxScore-thisMax > zdrop ) {
                 break;
             }
-        }
+        //}
         if ( thisMaxj<=0 ){
             break;
         }
         t = M1;
         M1 = M2;
         M2 = t;
+        M1[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
+        M2[0] = SCORE_OUT_BANDED_ALIGNMENT_REGION;
     }
 
     std::vector<uint32_t> cigar;

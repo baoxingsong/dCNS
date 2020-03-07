@@ -315,7 +315,7 @@ TEST(controlLayer, multCns){ // just to make sure that every line has been analy
             //std::map<std::string, std::string> & sequences, /*species, fastaFile*/
                                 samFiles,/*species, sameFile*/
                                 referenceGenomeFile, minimumNumberOfSpecies, mini_cns_size,
-                                outputWithMinimumLengthPercentage);
+                                outputWithMinimumLengthPercentage, false);
 
 }
 

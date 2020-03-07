@@ -7,6 +7,6 @@
 
 #include <string>
 
-const std::string VERSION = "beta 0.3";
+const std::string VERSION = "beta 0.4";
 
 #endif //AND_CNS_VERSION_H

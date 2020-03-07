@@ -254,6 +254,8 @@ int pairCnsXExtend(int argc, char** argv){
         //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
         " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
         " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+        " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+        " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
         " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
         " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -287,6 +289,12 @@ int pairCnsXExtend(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -389,6 +397,8 @@ int pairCns2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -436,6 +446,12 @@ int pairCns2Gaps(int argc, char** argv){
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
     }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
+    }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
     }
@@ -472,7 +488,6 @@ void weighted1Gap(std::string & _input,  std::string & _reference, std::string &
     std::map<std::string, FastaMeta> metaInformations;
 
     Scorei m(_matchingScore, _mismatchingPenalty);
-
 
     std::map<std::string, std::string> sequences;
     std::vector<std::string> seqNames;
@@ -560,6 +575,8 @@ int weighted1Gap(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -597,6 +614,12 @@ int weighted1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -726,6 +749,8 @@ int weighted2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -766,6 +791,12 @@ int weighted2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -1429,6 +1460,8 @@ int cut1Gap(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
 /*          " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << */std::endl;
     InputParser inputParser (argc, argv);
@@ -1465,6 +1498,12 @@ int cut1Gap(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
 
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
@@ -1591,6 +1630,8 @@ int cut2Gaps(int argc, char** argv){
           //" -m INT     minimum seeds size to trigger a alignment extension and the minimum conserved sequence to report (default: " << mini_cns_seed_size << ")" << std::endl <<
           " -c INT     minimum seeds score to trigger a alignment extension (default: " << mini_cns_score << ")" << std::endl <<
           " -s INT     step size for sliding the smith-waterman seeds alignment window (default: " << step_size << ")" << std::endl <<
+          " -l DOUBLE  lambda value for pvalue caculation (default: " << lambda << ")" << std::endl <<
+          " -k DOUBLE  k value for pvalue caculation (default: " << kValue << ")" << std::endl <<
           " -p DOUBLE  pvalue for significant alignment output (default: " << pvalues << ")" << std::endl <<
           " -b INT     minimum number of base-pairs between the maximum smith-waterman score with the score matrix boundary (default: " << matrix_boundary_distance << ") , it is not important" << std::endl;
     InputParser inputParser (argc, argv);
@@ -1633,6 +1674,12 @@ int cut2Gaps(int argc, char** argv){
     }
     if( inputParser.cmdOptionExists("-b") ){
         matrix_boundary_distance = std::stoi( inputParser.getCmdOption("-b") );
+    }
+    if( inputParser.cmdOptionExists("-l") ){
+        lambda = std::stod( inputParser.getCmdOption("-l") );
+    }
+    if( inputParser.cmdOptionExists("-k") ){
+        kValue = std::stod( inputParser.getCmdOption("-k") );
     }
     if( inputParser.cmdOptionExists("-p") ){
         pvalues = std::stod( inputParser.getCmdOption("-p") );
@@ -1845,6 +1892,21 @@ int cut2Gaps2(int argc, char** argv){
         std::cout << "sam file reading done" << std::endl;
         Scorei m(matchingScore, mismatchingPenalty);
 
+
+
+
+
+        std::ofstream ofile;
+        ofile.open(output+".sam", std::ios_base::app);
+        std::ofstream ofile2;
+        ofile2.open(output+"o", std::ios_base::app);
+        ofile.close();
+        ofile2.close();
+
+
+
+
+
         Matrix T(maximumAlignLength+1, maximumAlignLength + 1);
         for ( std::map<std::string, std::map<std::string, std::vector<Seed>>>::iterator it = positiveSeeds.begin(); it!=positiveSeeds.end(); ++it ){
 
@@ -1856,7 +1918,7 @@ int cut2Gaps2(int argc, char** argv){
             int32_t length1 = seq1_string.length();
 
             for ( std::map<std::string, std::vector<Seed>>::iterator it2=it->second.begin(); it2!=it->second.end(); ++it2){
-                std::cout << "position maize:" << it->first << " sorghum: " << it2->first << std::endl;
+//                std::cout << "position maize:" << it->first << " sorghum: " << it2->first << std::endl;
                 std::string seq2_0_string = query_genome[it2->first];
                 std::string seq2_string=seq2_0_string;
                 seq2_string.erase(std::remove(seq2_string.begin(), seq2_string.end(), 'n'), seq2_string.end());
@@ -1893,7 +1955,6 @@ int cut2Gaps2(int argc, char** argv){
             int32_t length1 = seq1_string.length();
 
             for ( std::map<std::string, std::vector<Seed>>::iterator it2=it->second.begin(); it2!=it->second.end(); ++it2){
-                std::cout << "negative maize:" << it->first << " sorghum: " << it2->first << std::endl;
                 std::string seq2_0_string = query_genome[it2->first];
                 seq2_0_string = getReverseComplementary(seq2_0_string);
 
@@ -1908,7 +1969,7 @@ int cut2Gaps2(int argc, char** argv){
                                         seq2, seq2_rev_com, length1, length2,  seed_window_size,
                                         openGapPenalty1, extendGapPenalty1, openGapPenalty2, extendGapPenalty2, matchingScore,
                                         mismatchingPenalty, m, seq1_string, seq2_string, pvalues,
-                                        lambda, kValue,zDrop,  bandwidth,positiveSeeds[it->first][it2->first], T, maximumAlignLength);
+                                        lambda, kValue,zDrop,  bandwidth,negativeSeeds[it->first][it2->first], T, maximumAlignLength);
                 if (onlySyntenic) {
                     std::vector<PairedSimilarFragment> pairedSimilarFragments = syntenic(pairedSimilarFragments0);
                     pairedSimilarFragments0 = pairedSimilarFragments;
@@ -1922,6 +1983,10 @@ int cut2Gaps2(int argc, char** argv){
             delete seq1;
             delete seq1_rev_com;
         }
+
+        ofile2.open(output+"o", std::ios_base::app);
+        ofile2 << "#done" << std::endl;
+        ofile2.close();
         return 0;
     }else{
         std::cerr << usage.str();
@@ -2069,14 +2134,11 @@ int smitherWaterManScoreOfRandomFragments(int argc, char** argv){
     if( inputParser.cmdOptionExists("-E") ){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E") );
     }
-
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
         std::cerr << usage.str();
     }else if( inputParser.cmdOptionExists("-r") && inputParser.cmdOptionExists("-i") ){
         std::vector<std::string> queryFastas = inputParser.getCmdOptionMultipleParameters("-i");
-
         std::string referenceFasta = inputParser.getCmdOption("-r");
-
 
         permutationLsqLambdaK( referenceFasta, queryFastas, openGapPenalty1,  extendGapPenalty1, matchingScore,
                                mismatchingPenalty, length, permutationTimes, seed, removen);
@@ -2101,13 +2163,14 @@ int multCns( int argc, char** argv ){
           //" -g FILE    query genome files in fasta format" << std::endl <<
           " -s FILEs   sam files output of any pairwise approach" << std::endl <<
           " -o FILE    output file in fasta format" << std::endl <<
-          " -m FILE    minimum output size" << std::endl <<
+          " -m FILE    minimum output size (default:" << mini_cns_size << ")" << std::endl <<
           //" -c INT     minimum number of species" << std::endl <<
           " -e DOUBLE  minimum out put of the full out put fragment length" << std::endl <<
           " -p INT     the minimum number of non-reference species that should contain similar fragment for output (default:"<< minimumNumberOfSpecies<<")" << std::endl <<
+          " -n bool    use only single sequence overlapping with reference (default: true)" << std::endl <<
+          "            if setting it as false, it might cost a lot of RAM and CPU time" << std::endl <<
           " -y bool    only output syntenic result (default: false)" << std::endl;
     InputParser inputParser (argc, argv);
-
 
     if( inputParser.cmdOptionExists("-y") ){
         onlySyntenic = str2bool( inputParser.getCmdOption("-y"), onlySyntenic );
@@ -2123,6 +2186,11 @@ int multCns( int argc, char** argv ){
 
     if( inputParser.cmdOptionExists("-p") ){
         minimumNumberOfSpecies = std::stoi( inputParser.getCmdOption("-p") );
+    }
+
+    bool onlyPickOneSequenceForEachSamForMSA  = true;
+    if( inputParser.cmdOptionExists("-n") ){
+        onlyPickOneSequenceForEachSamForMSA = str2bool( inputParser.getCmdOption("-n"), onlySyntenic );
     }
 
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
@@ -2151,12 +2219,11 @@ int multCns( int argc, char** argv ){
             }
             samFiles[filename] = file;
         }
-
         getCnsForMultipleSpecies (  onlySyntenic, output,
                 //std::map<std::string, std::string> & sequences, /*species, fastaFile*/
                 samFiles,/*species, sameFile*/
                 referenceGenomeFile, minimumNumberOfSpecies, mini_cns_size,
-                outputWithMinimumLengthPercentage);
+                outputWithMinimumLengthPercentage, onlyPickOneSequenceForEachSamForMSA);
 
         return 0;
     }else{

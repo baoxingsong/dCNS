@@ -116,9 +116,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
 
+    chromosome_gene_list1 = readGff(args.ref_gff)
+
     ref_genome = readFastaFile(args.ref_geno)
     fastas = readFastaFile(args.refcds)
-    chromosome_gene_list1 = readGff(args.ref_gff)
 
     chromosome_gene_list2, gene_name_dict = readSam(args.sam, fastas, args.similarity )
     query_genome = readFastaFile(args.query)

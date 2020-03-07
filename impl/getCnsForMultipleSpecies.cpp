@@ -102,6 +102,8 @@ bool getNext( const std::vector< std::vector<int>> & allCombinations, std::vecto
     }
 }
 
+//todo there are bug with this function, should update it according to the last one
+
 void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<int32_t> & lengths,
                                 int32_t & windowsSize, int32_t & mini_cns_seed_size, int32_t & mini_cns_score,
                                 const int32_t & matrix_boundary_distance, const int32_t & _open_gap_penalty,
@@ -191,11 +193,10 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
         overlapped[i].resize(allPairedSimilarFragments[i].size(), false);
     }
     for ( int32_t ai=0; ai< allPairedSimilarFragments.size(); ++ai ) {
-        /**
-         * If there are multiple records in the 3,4,...n species that overlapped with the record in the 2(second) one.
-         * Firstly only care about the first overlapped one, then take the second third .... overlapping as reference to run everything again
-         * **/
 
+//        If there are multiple records in the 3,4,...n species that overlapped with the record in the 2(second) one.
+//        Firstly only care about the first overlapped one, then take the second third .... overlapping as reference to run everything again
+//
         for (int32_t i=0; i <allPairedSimilarFragments[ai].size(); ++i) {
             // the alignment must present in the reference, maybe not good
             // BUT ED suggest it make no sense to detect CNS no present in the reference sequence
@@ -227,9 +228,15 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
 
             //overlapped has the same size with allPairedSimilarFragments
             std::vector<int> combination(allCombinations.size(), -1);
+            std::vector<int32_t> combinationi(allCombinations.size(), -1);
             while (getNext(allCombinations, combination)) {
+                for( int ci=0; ci<combination.size(); ++ci){
+                    std::cout << "ci:" << allCombinations[ci][combination[ci]] << std::endl;
+                    combinationi[ci] = allCombinations[ci][combination[ci]];
+                }
+
                 // if this combination has been checked, do not repeat it begin
-                Combination c(combination);
+                Combination c(combinationi);
                 if (allCombinationsSetUsed.find(c) != allCombinationsSetUsed.end()) {
 //                    std::cout << "line 192" << std::endl;
                     continue;
@@ -267,7 +274,7 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
                                     }
                                 }
                             }
-                            if (species.size() >=minimumNumberOfSpecies && thisNumberOfSequences >= minimumNumberOfSpecies /*&& thisNumberOfSpecies > numberOfSpecies*/ ) {
+                            if (species.size() >=minimumNumberOfSpecies && thisNumberOfSequences >= minimumNumberOfSpecies ) { //&& thisNumberOfSpecies > numberOfSpecies ) {
                                 refStart = start;
                                 refEnd = end;
                                 length = newLength;
@@ -428,14 +435,13 @@ void getCnsForMultipleSpecies ( int8_t ** seqs, int8_t ** seq_revs, std::vector<
 
 
 
-
 //take sam files as input
 void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & output,
                                 //std::map<std::string, std::string> & sequences, /*species, fastaFile*/
                                 std::map<std::string, std::string> & samFiles,/*species, sameFile*/
                                 std::string & referenceGenomeFile,
                                 const int32_t & minimumNumberOfSpecies, const int32_t & mini_cns_size,
-                                const double & outputWithMinimumLengthPercentage){
+                                const double & outputWithMinimumLengthPercentage, bool onlyPickOneSequenceForEachSamForMSA){
 
     std::map<std::string, std::string> referenceGenome;
     readFastaFile( referenceGenomeFile, referenceGenome);
@@ -561,23 +567,24 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
         }
         std::cout << samFile << " reading done" << std::endl;
     }
+    // sam files reading done, get a data structure pairedSimilarFragments
 
 
     std::map <std::string /*reference chr*/,  std::vector<std::vector<PairedSimilarFragment2>>> pairedSimilarFragments1;
-
     for ( std::map <std::string,  std::map<std::string, std::vector<PairedSimilarFragment2>>>::iterator ii = pairedSimilarFragments.begin(); ii!=pairedSimilarFragments.end(); ++ii ){
         pairedSimilarFragments1[ii->first] = std::vector<std::vector<PairedSimilarFragment2>>();
         for ( std::map<std::string, std::vector<PairedSimilarFragment2>>::iterator i = ii->second.begin(); i!=ii->second.end(); ++i ){
             pairedSimilarFragments1[ii->first].push_back(i->second);
         }
     }
+    // re-organized the data structure into pairedSimilarFragments1
 
     std::ofstream ofile;
     ofile.open(output);
     for( std::map <std::string, std::vector<std::vector<PairedSimilarFragment2>>>::iterator it=pairedSimilarFragments1.begin(); it!=pairedSimilarFragments1.end(); ++it ) {
         std::string referenceChr = it->first;
-        std::cout << referenceChr << std::endl;
-        std::vector<std::vector<PairedSimilarFragment2>> allPairedSimilarFragments = it->second;
+        std::cout << "referenceChr:" << referenceChr << std::endl;
+        std::vector<std::vector<PairedSimilarFragment2>> allPairedSimilarFragments = it->second; // each vector is the CNS in each species
 
         //sort according to the reference coordinate begin //remember those have been sorted, should be used for speeding up
         for ( int32_t i=0; i< allPairedSimilarFragments.size(); ++i ){
@@ -585,6 +592,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                       [](PairedSimilarFragment2 a, PairedSimilarFragment2 b) {
                           return a.getStart1() < b.getStart1();
                       });
+//            std::cout << i << " size:" << allPairedSimilarFragments[i].size() << std::endl;
         }
         //sort according to the reference coordinate end
 
@@ -604,10 +612,15 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                 // the alignment must present in the reference, maybe not good
                 // BUT ED suggest it make no sense to detect CNS no present in the reference sequence
 
+                // here use allPairedSimilarFragments[ai][i] as reference, and check which CNS in different species overlapped with this one
+
+
                 // set all the if overlap values begin
                 for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
                     if (j == ai) {
-                        overlapped[j].resize(allPairedSimilarFragments[j].size(), false);
+                        for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+                            overlapped[j][k] = false; // only use 1 in this accession
+                        }
                         overlapped[j][i] = true;
                     } else {
                         for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
@@ -628,17 +641,60 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
                 }
                 // set all the if overlap values end
 
-                std::vector<std::vector<int32_t>> allCombinations = generateAllCombinations(
-                        overlapped);  // matrix size: ### X (n-2)
-//                std::cout << "MSA line 632" << std::endl;
-
+                if(onlyPickOneSequenceForEachSamForMSA){
+                    // only keep one CNS for each species, else it would take too much RAM and CPU time
+                    // if you have 10 species, and for 8 species, there are 1000 CNS overlapped with the one taking as reference
+                    // the size of the index combination matrix would be 1000^8, take huge RAM. And the computing for all of those combinations would take a lot of time
+                    // for practical purpose, for each species we only select the one which give longest overlap with the reference CNS
+                    for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
+                        if (j != ai) {
+                            int32_t longest_length = 0;
+                            int32_t longest_index = -1;
+                            for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+                                if( overlapped[j][k] ){
+                                    int32_t thisRefStart = allPairedSimilarFragments[ai][i].getStart1() > allPairedSimilarFragments[j][k].getStart1() ? allPairedSimilarFragments[ai][i].getStart1() : allPairedSimilarFragments[j][k].getStart1();
+                                    int32_t thisRefEnd = allPairedSimilarFragments[ai][i].getEnd1() < allPairedSimilarFragments[j][k].getEnd1() ? allPairedSimilarFragments[ai][i].getEnd1() : allPairedSimilarFragments[j][k].getEnd1();
+                                    int32_t thisRefLength = thisRefEnd - thisRefStart + 1;
+                                    if( thisRefLength > longest_length ){
+                                        longest_length = thisRefLength;
+                                        longest_index = k;
+                                    }
+                                    overlapped[j][k] = false;
+                                }
+                            }
+                            if( longest_index > -1 ){
+                                overlapped[j][longest_index] = true;
+                            }
+                        }
+                    }
+                }
+//                std::cout << "line 666" << std::endl;
+                std::vector<std::vector<int32_t>> allCombinations = generateAllCombinations(overlapped);  // matrix size: ### X (n-2)
+                // the size should be one now
+//                std::cout << "line 664 allCombinations size:" << allCombinations.size() << std::endl;
                 //overlapped has the same size with allPairedSimilarFragments
+//
+//                for (int32_t j = 0; j < allPairedSimilarFragments.size(); ++j) {
+//                    for (int32_t k = 0; k < allPairedSimilarFragments[j].size(); ++k) {
+//                        if( overlapped[j][k] ){
+//                            std::cout << "j: " << j << " k: " << k << std::endl;
+//                        }
+//                    }
+//                }
+
                 std::vector<int32_t> combination(allCombinations.size(), -1);
+                std::vector<int32_t> combinationi(allCombinations.size(), -1);
                 while (getNext(allCombinations, combination)) {
+                    for( int ci=0; ci<combination.size(); ++ci){
+//                        std::cout << "ci:" << allCombinations[ci][combination[ci]] << std::endl;
+                        combinationi[ci] = allCombinations[ci][combination[ci]];
+                    }
+
+//                    std::cout << "line 682 combination size :" << combination.size() << std::endl;
                     // if this combination has been checked, do not repeat it begin
-                    Combination c(combination);
+
+                    Combination c(combinationi);
                     if (allCombinationsSetUsed.find(c) != allCombinationsSetUsed.end()) {
-                        //                    std::cout << "line 192" << std::endl;
                         continue;
                     }
                     allCombinationsSetUsed.insert(c);
@@ -656,7 +712,7 @@ void getCnsForMultipleSpecies ( const bool & onlySyntenic, const std::string & o
 
                     int32_t refStart = 0;
                     int32_t refEnd = 0;
-                    int32_t length = 0;
+                    int32_t length = 0; // get the longest CNS that fit the criteria
                     for (int32_t start : starts) {
                         for (int32_t end : ends) {
                             std::set<std::string> species;
