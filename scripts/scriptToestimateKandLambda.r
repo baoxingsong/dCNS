@@ -15,6 +15,8 @@ library(minpack.lm)
 nonlin_mod=nlsLM(y~(1-exp(-1*k*1000000*exp(-1*l*x))), control=nls.lm.control(maxiter=550), start=list(k=0.3, l=0.2))
 plot(x, y, xlab="s", ylab="p-value")
 lines(x,predict(nonlin_mod),col="red")
+nonlin_mod
+
 
 
 
@@ -103,3 +105,6 @@ Nonlinear regression model
 
 Number of iterations to convergence: 32
 Achieved convergence tolerance: 1.49e-08
+
+
+

@@ -216,7 +216,7 @@ void x_extend_seed(int32_t & start1, int32_t & end1, int32_t & start2, int32_t &
     int32_t endPosition2_rc;
     int32_t s1 = start1;
     int32_t s2 = start2;
-
+    // TODO this SemiGlobal_xextend implementation could be faster
     SemiGlobal_xextend(seq1+start1, seq2+start2, length1-start1, length2-start2, _open_gap_penalty1, _extend_gap_penalty1,
     maxScore, endPosition1, endPosition2, m, xdrop, w);
     if( endPosition1<0 || endPosition2 <0 ){
@@ -482,6 +482,11 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
 //    std::cout << "line 461 begin to link seeds" << std::endl;
     link_seeds( seeds );  // this function is very fast, by using less seeds, the program is significantly faster
 //    std::cout << "line 463 generating seeds done" << std::endl;
+
+    for (Seed seed : seeds) {
+
+    }
+
     Matrix T (length1 + 1, length2 + 1);
     for (Seed seed : seeds) {
         start1 = seed.getStart1()+1;
@@ -653,7 +658,6 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
             }
         }
         if ( useThisSeed ){
-    //        std::cout << "line 622 " << std::endl;
             endPosition1 = x_seed.getEnd1();
             endPosition2 = x_seed.getEnd2();
             int32_t length11 = 1 + endPosition1 < maximumAlignLength ? 1 + endPosition1 : maximumAlignLength;
@@ -668,17 +672,17 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
                        length11, length12, _open_gap_penalty1, _extend_gap_penalty1, _open_gap_penalty2,
                        _extend_gap_penalty2, maxScore, endPosition1_rc, endPosition2_rc, m, false, zDrop, bandwidth, T);// this is the reverse alignment
 
-    //        for ( int32_t  seq_index = (length1 - 1 - endPosition1); seq_index <= (length1 - 1 - endPosition1 + 100); ++seq_index){
-    //            std::cout << static_cast<int16_t>(*(seq1_rev_com+seq_index)) ;
-    //        }
-    //        std::cout << std::endl;
-    //
-    //        for ( int32_t  seq_index = (length2 - 1 - endPosition2); seq_index <= (length2 - 1 - endPosition2 + 100); ++seq_index){
-    //            std::cout << static_cast<int16_t>(*(seq2_rev_com+seq_index)) ;
-    //        }
-    //        std::cout << std::endl;
-    //
-    //        std::cout << "line 655 " << maxScore << " endPosition1_rc:" << endPosition1_rc << " endPosition2_rc:" << endPosition2_rc << std::endl;
+//            for ( int32_t  seq_index = (length1 - 1 - endPosition1); seq_index <= (length1 - 1 - endPosition1 + 100); ++seq_index){
+//                std::cout << static_cast<int16_t>(*(seq1_rev_com+seq_index)) ;
+//            }
+//            std::cout << std::endl;
+//
+//            for ( int32_t  seq_index = (length2 - 1 - endPosition2); seq_index <= (length2 - 1 - endPosition2 + 100); ++seq_index){
+//                std::cout << static_cast<int16_t>(*(seq2_rev_com+seq_index)) ;
+//            }
+//            std::cout << std::endl;
+
+//            std::cout << "line 655 " << maxScore << " endPosition1_rc:" << endPosition1_rc << " endPosition2_rc:" << endPosition2_rc << std::endl;
 
 
 

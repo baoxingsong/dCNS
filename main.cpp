@@ -17,15 +17,7 @@ int main( int argc, char** argv ) {
         usage();
         exit(1);
     }
-/*
-    if( program.compare("pair-cns") == 0 ) {
-        return pairCns(--argc, ++argv);
-    }else if ( program.compare("mult-cns") ==0){
-        return multCns(--argc, ++argv);
-    }else{
-        usage();
-    }
-    */
+
 
     if( program.compare("pairCnsXExtend") == 0 ) {
         return pairCnsXExtend(--argc, ++argv);
@@ -57,17 +49,9 @@ int main( int argc, char** argv ) {
     return 0;
 }
 
-int mainwe( int argc, char** argv ) {
+int maine( int argc, char** argv ) {
     testing::InitGoogleTest(&argc, argv);
     RUN_ALL_TESTS();
     return 0;
 }
 
-// in case it is needed
-// in blast the default values for lambda and K
-//
-// Lambda	1.33271	1.28
-// K	0.620991	0.46
-// H	1.12409	0.85
-
-//TODO for those failed extension alignment result, should try to use a larger band width

@@ -91,7 +91,7 @@ void usage( ){
 //    "    weighted2Gaps       sliding window seed, x-drop extension, weighted x-drop 2-piece gap cost re-alignment and extension" << std::endl <<
     "    cut1Gap             masking genome, sliding window seed, x-drop extension" << std::endl <<
 //    "    cut2Gaps            masking genome sliding window seed, x-drop extension, 2-piece gap cost extension" << std::endl <<
-//    "    cut2Gaps2           extend the cut1Gap result using cut2Gaps approach" << std::endl <<
+    "    cut2Gaps2           extend the cut1Gap result using cut2Gaps approach" << std::endl <<
     "    multCns             detect conserved fragment among a group of sequences" << std::endl <<
     std::endl <<
     "Complementary commands:"<< std::endl <<

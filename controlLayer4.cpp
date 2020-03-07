@@ -1892,6 +1892,21 @@ int cut2Gaps2(int argc, char** argv){
         std::cout << "sam file reading done" << std::endl;
         Scorei m(matchingScore, mismatchingPenalty);
 
+
+
+
+
+        std::ofstream ofile;
+        ofile.open(output+".sam", std::ios_base::app);
+        std::ofstream ofile2;
+        ofile2.open(output+"o", std::ios_base::app);
+        ofile.close();
+        ofile2.close();
+
+
+
+
+
         Matrix T(maximumAlignLength+1, maximumAlignLength + 1);
         for ( std::map<std::string, std::map<std::string, std::vector<Seed>>>::iterator it = positiveSeeds.begin(); it!=positiveSeeds.end(); ++it ){
 
@@ -1903,7 +1918,7 @@ int cut2Gaps2(int argc, char** argv){
             int32_t length1 = seq1_string.length();
 
             for ( std::map<std::string, std::vector<Seed>>::iterator it2=it->second.begin(); it2!=it->second.end(); ++it2){
-                std::cout << "position maize:" << it->first << " sorghum: " << it2->first << std::endl;
+//                std::cout << "position maize:" << it->first << " sorghum: " << it2->first << std::endl;
                 std::string seq2_0_string = query_genome[it2->first];
                 std::string seq2_string=seq2_0_string;
                 seq2_string.erase(std::remove(seq2_string.begin(), seq2_string.end(), 'n'), seq2_string.end());
@@ -1940,7 +1955,6 @@ int cut2Gaps2(int argc, char** argv){
             int32_t length1 = seq1_string.length();
 
             for ( std::map<std::string, std::vector<Seed>>::iterator it2=it->second.begin(); it2!=it->second.end(); ++it2){
-                std::cout << "negative maize:" << it->first << " sorghum: " << it2->first << std::endl;
                 std::string seq2_0_string = query_genome[it2->first];
                 seq2_0_string = getReverseComplementary(seq2_0_string);
 
@@ -1955,7 +1969,7 @@ int cut2Gaps2(int argc, char** argv){
                                         seq2, seq2_rev_com, length1, length2,  seed_window_size,
                                         openGapPenalty1, extendGapPenalty1, openGapPenalty2, extendGapPenalty2, matchingScore,
                                         mismatchingPenalty, m, seq1_string, seq2_string, pvalues,
-                                        lambda, kValue,zDrop,  bandwidth,positiveSeeds[it->first][it2->first], T, maximumAlignLength);
+                                        lambda, kValue,zDrop,  bandwidth,negativeSeeds[it->first][it2->first], T, maximumAlignLength);
                 if (onlySyntenic) {
                     std::vector<PairedSimilarFragment> pairedSimilarFragments = syntenic(pairedSimilarFragments0);
                     pairedSimilarFragments0 = pairedSimilarFragments;
@@ -1969,6 +1983,10 @@ int cut2Gaps2(int argc, char** argv){
             delete seq1;
             delete seq1_rev_com;
         }
+
+        ofile2.open(output+"o", std::ios_base::app);
+        ofile2 << "#done" << std::endl;
+        ofile2.close();
         return 0;
     }else{
         std::cerr << usage.str();
@@ -2116,14 +2134,11 @@ int smitherWaterManScoreOfRandomFragments(int argc, char** argv){
     if( inputParser.cmdOptionExists("-E") ){
         extendGapPenalty1 = std::stoi( inputParser.getCmdOption("-E") );
     }
-
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
         std::cerr << usage.str();
     }else if( inputParser.cmdOptionExists("-r") && inputParser.cmdOptionExists("-i") ){
         std::vector<std::string> queryFastas = inputParser.getCmdOptionMultipleParameters("-i");
-
         std::string referenceFasta = inputParser.getCmdOption("-r");
-
 
         permutationLsqLambdaK( referenceFasta, queryFastas, openGapPenalty1,  extendGapPenalty1, matchingScore,
                                mismatchingPenalty, length, permutationTimes, seed, removen);

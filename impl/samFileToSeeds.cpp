@@ -47,7 +47,6 @@ void samFileToSeeds ( std::string & samFile, std::map<std::string, std::map<std:
             std::cout << "reading samfile file line " << samLineNumber << std::endl;
         }
         ++samLineNumber;
-//        std::cout << line << std::endl;
         if(line[0]=='@' || line.size()<9){
         }else {
             regex_search(line, samMatch, samRegex);
@@ -55,6 +54,7 @@ void samFileToSeeds ( std::string & samFile, std::map<std::string, std::map<std:
                 cigarString = samMatch[6];
                 regex_search(cigarString, cigarMatch1, cigarRegex1);
                 if ( !cigarMatch1.empty() ) {
+
                     std::string referenceChromosomeName = samMatch[3];
                     std::string queryChromosomeName = samMatch[1];
                     refStart = stoi(samMatch[4]);
@@ -82,7 +82,6 @@ void samFileToSeeds ( std::string & samFile, std::map<std::string, std::map<std:
                     refEnd = refEnd - 2;
                     queryStart = queryStart - 1;
                     queryEnd = queryEnd - 2;
-
 
                     int32_t numberOfNs1 = numberOfNInAInterval( refGenome[referenceChromosomeName], 0, refStart-1);
                     int32_t numberOfNs2 = numberOfNInAInterval( refGenome[referenceChromosomeName], refStart, refEnd);

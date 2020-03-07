@@ -1188,6 +1188,47 @@ std::vector<uint32_t> mapCnsToGenome(int8_t *seq1, int8_t *seq2, const int32_t &
 
 
 
+// this is a gapless alignment extension approach, and do not return cigar
+void gapless_extend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
+                        const int32_t &length2, int32_t &maxScore,
+                        int32_t &endPosition1, int32_t &endPosition2, const Scorei & m){// not sure this band approach and avx which is faster
+
+    int32_t length = length2 < length1 ? length2 : length1;
+    int32_t i, j, currentScore=maxScore, mscore;
+    int32_t thisMaxi=0;
+    for ( i=1; i<=length; ++i ){
+        currentScore += m.getScore(seq1[i-1], seq2[i-1]);
+        if( currentScore > maxScore ){
+            maxScore = currentScore;
+            thisMaxi = i;
+        }else if( currentScore < maxScore + 3* m.getScore(1, 2)){ //m.getScore(1, 2) is a mismatch
+            break;
+        }
+    }
+    endPosition1 += thisMaxi;
+    endPosition2 += thisMaxi;
+}
+/*
+void gapless_extend(int8_t *seq1, int8_t *seq2, int32_t &maxScore, const int8_t & yDrop,
+                    int32_t & start1, int32_t & end1, int32_t & start2, int32_t & end2, const Scorei & m){// not sure this band approach and avx which is faster
+
+    int32_t length = length2 < length1 ? length2 : length1;
+    int32_t i, j, currentScore=maxScore, mscore;
+    int32_t thisMaxi=0;
+    for ( i=1; i<=length; ++i ){
+        currentScore += m.getScore(seq1[i-1], seq2[i-1]);
+        if( currentScore > maxScore ){
+            maxScore = currentScore;
+            thisMaxi = i;
+        }else if( currentScore < maxScore + 3* m.getScore(1, 2)){ //m.getScore(1, 2) is a mismatch
+            break;
+        }
+    }
+    endPosition1 += thisMaxi;
+    endPosition2 += thisMaxi;
+}
+*/
+
 
 // this is a x-drop sequence alignment extension approach, and do not return cigar
 void SemiGlobal_xextend(int8_t *seq1, int8_t *seq2, const int32_t &length1,
