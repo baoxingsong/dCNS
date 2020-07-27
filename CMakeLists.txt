@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(dCNS)
 include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
 set(CMAKE_CXX_STANDARD 14)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -11,12 +12,14 @@ endif()
 
 
 
-CHECK_CXX_COMPILER_FLAG("-mavx2" COMPILER_OPT_ARCH_AVX2_SUPPORTED)
-CHECK_CXX_COMPILER_FLAG("-msse2" COMPILER_OPT_ARCH_SSE2_SUPPORTED)
-if(COMPILER_OPT_ARCH_AVX2_SUPPORTED)
+CHECK_CXX_COMPILER_FLAG("-mavx2" CXX_COMPILER_OPT_ARCH_AVX2_SUPPORTED)
+CHECK_CXX_COMPILER_FLAG("-msse2" CXX_COMPILER_OPT_ARCH_SSE2_SUPPORTED)
+CHECK_C_COMPILER_FLAG("-mavx2" C_COMPILER_OPT_ARCH_AVX2_SUPPORTED)
+CHECK_C_COMPILER_FLAG("-msse2" C_COMPILER_OPT_ARCH_SSE2_SUPPORTED)
+if(CXX_COMPILER_OPT_ARCH_AVX2_SUPPORTED AND C_COMPILER_OPT_ARCH_AVX2_SUPPORTED)
     set(CMAKE_CXX_FLAGS "-Wall -g3 -O3 -funroll-all-loops -mavx2 -I ./ -std=gnu++14 -pthread")
     set(CMAKE_C_FLAGS "-Wall -g3 -O3 -funroll-all-loops -mavx2 -I ./ -std=gnu++14 -pthread")
-elseif( COMPILER_OPT_ARCH_SSE2_SUPPORTED)
+elseif( CXX_COMPILER_OPT_ARCH_SSE2_SUPPORTED AND C_COMPILER_OPT_ARCH_SSE2_SUPPORTED)
     set(CMAKE_CXX_FLAGS "-Wall -msse2 -g3 -O3 -funroll-all-loops -I ./ -std=gnu++14 -pthread")
     set(CMAKE_C_FLAGS "-Wall -msse2 -g3 -O3 -funroll-all-loops -I ./ -std=gnu++14 -pthread")
 else()
