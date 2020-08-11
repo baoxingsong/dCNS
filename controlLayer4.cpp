@@ -2054,7 +2054,7 @@ int maskGenome(int argc, char** argv){
 
         std::map<std::string, std::string> ifCds;
         if( inputParser.cmdOptionExists("-g") ){
-            std::cout << "masking genome using GFF3 file and sam file" << std::endl;
+            std::cout << "masking genome using kmer and GFF3 file" << std::endl;
             std::string gff = inputParser.getCmdOption("-g");
             if ( inputParser.cmdOptionExists("-z") ){
                 gffToMaskGene ( gff, genome, ifCds);
@@ -2093,7 +2093,7 @@ int smitherWaterManScoreOfRandomFragments(int argc, char** argv){
     int32_t seed = 1;
     std::stringstream usage;
     bool removen = true;
-    usage << "Usage: "<<softwareName<<" ranSco -i input -r reference -q query -o output" << std::endl<<
+    usage << "Usage: "<<softwareName<<" ranSco -i input -r reference -q query" << std::endl<<
           "Options" << std::endl <<
           " -r FILE    reference genome file in fasta format" << std::endl <<
           " -i FILE    input file in fasta format" << std::endl <<

@@ -483,9 +483,9 @@ std::vector<PairedSimilarFragment> findSimilarFragmentsForPairedSequence ( int8_
     link_seeds( seeds );  // this function is very fast, by using less seeds, the program is significantly faster
 //    std::cout << "line 463 generating seeds done" << std::endl;
 
-    for (Seed seed : seeds) {
-
-    }
+//    for (Seed seed : seeds) {
+//
+//    }
 
     Matrix T (length1 + 1, length2 + 1);
     for (Seed seed : seeds) {
