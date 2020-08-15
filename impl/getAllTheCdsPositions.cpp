@@ -104,12 +104,23 @@ void gffToMaskGene (const std::string& filePath, std::map<std::string, std::stri
 
 void samToMask (const std::string& filePath, std::map<std::string, std::string>& genome,
                 std::map<std::string, std::string> & ifCds, double & similarity, std::map<std::string, std::string> & cdsSequences){
-
-    ifCds.clear();
+    bool recreatIfCds = false;
+    if (ifCds.size() ==0){
+        recreatIfCds = true;
+    }
     for( std::map<std::string, std::string>::iterator it = genome.begin(); it!=genome.end(); ++it ){
-        ifCds[it->first] = std::string(it->second.size(), '0');
+        if(ifCds[it->first].size() != it->second.size()){
+            recreatIfCds = true;
+        }
     }
 
+    if (recreatIfCds){
+        ifCds.clear();
+        for( std::map<std::string, std::string>::iterator it = genome.begin(); it!=genome.end(); ++it ){
+            ifCds[it->first] = std::string(it->second.size(), '0');
+        }
+        std::cout << "GFF was not used for genome masking" << std::endl;
+    }
     std::ifstream infile(filePath);
     if( ! infile.good()){
         std::cerr << "error in opening GFF/GTF file " << filePath << std::endl;
