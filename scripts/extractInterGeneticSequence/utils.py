@@ -160,14 +160,19 @@ def readGff(gffFilePath):
         for line in f:
             m = re.search('^#', line)
             if( m == None ):
-                m = re.search('^(\S+)\s+(\S+)\s+gene\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);.*?biotype=protein_coding;', line)
+                m = re.search('^(\S+)\s+(\S+)\s+gene\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);', line)
                 if (m != None): # The begaining of the new gene entry suggests the end of information of last gene entry. So here we could organize the data structure of the last gene
-                    if len(gene_name)>0:
+                    if len(gene_name)>0 and gene_name in gene_start:
                         g = Gene(gene_name, gene_strand[gene_name], gene_start[gene_name], gene_end[gene_name], chromosome_name)
                         chromosome_gene_list[chromosome_name] = np.append(chromosome_gene_list[chromosome_name], [g])
 
-                m = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?);.*?biotype=protein_coding;', line)
-                if (m != None):
+                m1 = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);.*?Parent=(.*?);', line)
+                m2 = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);.*?Parent=(.*?)$', line)
+                if m1 != None:
+                    m = m1
+                else:
+                    m = m2
+                if (m != None) and "curator_summary=pseudogene" not in line:
                     chromosome_name = m.group(1)
                     if (not chromosome_name in chromosome_gene_list):
                         chromosome_gene_list[chromosome_name] = np.empty([0, 1], Gene)
@@ -177,7 +182,7 @@ def readGff(gffFilePath):
                     pname = m.group(9)
                     pname = pname.replace("gene:", "")
                     gene_name=pname
-                    if pname not in gene_strand: # is there is gene stand information, suggest this is the first transcript of this gene, and we define the first transcript as the primary transcript
+                    if pname not in gene_strand: # if there is no gene stand information, suggest this is the first transcript of this gene, and we define the first transcript as the primary transcript
                         gene_strand[pname] = strand
                         transcript_gene[name] = pname
                 else:

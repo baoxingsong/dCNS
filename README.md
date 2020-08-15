@@ -96,17 +96,17 @@ minimap2 -ax splice -a -uf -C 1 -k 12 -P -t 12 --cs /media/bs674/2t/genomeSequen
 
 mask the query genome
 ```
-and_CNS maskGenome -i /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -o masked_setaria_k20_50.fa -b setaria.sam -c ../gene.fa -k setaria_k20_count_dumps.fa -f 33
+dCNS maskGenome -i /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -o masked_setaria_k20_50.fa -s setaria.sam -c ../gene.fa -k setaria_k20_count_dumps.fa -f 33
 ```
 
 mask the reference genome
 ```
-and_CNS maskGenome -i /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -o masked_B73_v4_k20_46_cds.fa -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -k b73_m20_mer_counts_dumps.fa -f 46
+dCNS maskGenome -i /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -o masked_B73_v4_k20_46_cds.fa -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -k b73_m20_mer_counts_dumps.fa -f 46
 ```
 
 prepare the sequence for alignment
 ```
-python3 /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV2.py -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -r /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -c ../gene.fa -q /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -s /media/bs674/1_8t/AndCns/maskGenomeForGenomeAlignment/Setaria_italica/setaria.sam -o and_cns_setaria_maize_V2
+python3 /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV2.py -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -r /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -c ../gene.fa -q /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -s /media/bs674/1_8t/AndCns/maskGenomeForGenomeAlignment/Setaria_italica/setaria.sam -o dCNS_setaria_maize_V2
 ```
 
 
@@ -114,8 +114,8 @@ python3 /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/extractInterG
 go the folder and generate commands, the genome file must be the masked genome
 
 ```
-cd and_cns_setaria_maize_V2
-ls | awk '{print("and_CNS cut1Gap -ra masked_B73_v4_k20_46.fa -qa masked_A1025_k20_57.fa -i "$1" -r reference -o "$1".5")}' > command1
+cd dCNS_setaria_maize_V2
+ls | awk '{print("dCNS cut1Gap -ra masked_B73_v4_k20_46.fa -qa masked_A1025_k20_57.fa -i "$1" -r reference -o "$1".5")}' > command1
 ```
 
 run all the commands with in file `command1` file. I use GNU parallel to run it.
@@ -128,7 +128,7 @@ perl ./scripts/checkUnfinishedJobsV2.pl command1  > command1_missing
 goto the farther folder and combine those sam outputs
 ```
 cd ../
-perl /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/combineCnsSamFiles.pl  and_cns_setaria_maize_V2 > 5.sam
+perl /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/combineCnsSamFiles.pl  dCNS_setaria_maize_V2 > 5.sam
 ```
 
 reformat sam file into bam file
