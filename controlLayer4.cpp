@@ -2035,8 +2035,6 @@ int maskGenome(int argc, char** argv){
     }
     if(inputParser.cmdOptionExists("-h") ||inputParser.cmdOptionExists("--help")  ){
         std::cerr << usage.str();
-    }else if ( inputParser.cmdOptionExists("-s") && inputParser.cmdOptionExists("-g") ){
-        std::cerr << "please give one and only one of gff3 file or bam file" << std::endl;
     }else if(
             inputParser.cmdOptionExists("-i") && inputParser.cmdOptionExists("-o")){
 
@@ -2054,15 +2052,16 @@ int maskGenome(int argc, char** argv){
 
         std::map<std::string, std::string> ifCds;
         if( inputParser.cmdOptionExists("-g") ){
-            std::cout << "masking genome using kmer and GFF3 file" << std::endl;
+            std::cout << "masking genome using GFF file" << std::endl;
             std::string gff = inputParser.getCmdOption("-g");
             if ( inputParser.cmdOptionExists("-z") ){
                 gffToMaskGene ( gff, genome, ifCds);
             }else{
                 gffToMask ( gff, genome, ifCds);
             }
-        }else if (inputParser.cmdOptionExists("-s") and inputParser.cmdOptionExists("-c") ){
-            std::cout << "masking genome using kmer and sam file" << std::endl;
+        }
+        if (inputParser.cmdOptionExists("-s") and inputParser.cmdOptionExists("-c") ){
+            std::cout << "masking genome using sam file" << std::endl;
             std::string sam = inputParser.getCmdOption("-s");
 
             if ( inputParser.cmdOptionExists("-p")) {
@@ -2075,7 +2074,7 @@ int maskGenome(int argc, char** argv){
             samToMask (sam, genome, ifCds, similarity, cdsSequences);
 
         }
-
+        std::cout << "masking genome using kmer" << std::endl;
         maskGenome( genome, alterChar,  kmerProfileFile, maskKmerFrequency, outputLineWidth,
                 ifCds, outputFile, seqNames, ifSoftmask);
         return 0;
