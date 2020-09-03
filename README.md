@@ -57,7 +57,7 @@ make
 ```
 
 
-#k-mer masking
+#### k-mer masking
 
 ```
 kat hist -t 12 /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -m 20 -o setaria.kat.m20.hist
@@ -102,7 +102,7 @@ mask the reference genome
 ```
 dCNS maskGenome -i /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -o masked_B73_v4_k20_46_cds.fa -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -k b73_m20_mer_counts_dumps.fa -f 46
 ```
-
+#### CNS calling
 prepare the sequence for alignment
 ```
 python3 /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV2.py -g /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.34.gff3 -r /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa -c ../gene.fa -q /media/bs674/2t/genomeSequence/Setaria_italica/Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -s /media/bs674/1_8t/AndCns/maskGenomeForGenomeAlignment/Setaria_italica/setaria.sam -o dCNS_setaria_maize_V2
@@ -130,7 +130,7 @@ cd ../
 perl /home/bs674/Dropbox/andropogoneae-conservation/SSW/scripts/combineCnsSamFiles.pl  dCNS_setaria_maize_V2 > 5.sam
 ```
 
-reformat sam file into bam file
+#### reformat sam file into bam file
 ```
 cat 5.sam| sort | uniq >5_uniq.sam
 samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
