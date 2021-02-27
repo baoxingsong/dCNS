@@ -1220,7 +1220,6 @@ void outputMasking(std::string _output, std::vector<PairedSimilarFragment> & pai
                 }
             }
 
-
             for( int32_t j=newCigar.size()-1; j>=0; --j ){
                 uint32_t cigarLength = newCigar[j]>>4;
                 uint32_t cigarType = newCigar[j]&0xf;
