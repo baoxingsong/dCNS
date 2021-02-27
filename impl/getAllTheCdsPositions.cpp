@@ -123,7 +123,7 @@ void samToMask (const std::string& filePath, std::map<std::string, std::string>&
     }
     std::ifstream infile(filePath);
     if( ! infile.good()){
-        std::cerr << "error in opening GFF/GTF file " << filePath << std::endl;
+        std::cerr << "error in opening file " << filePath << std::endl;
         exit (1);
     }
     std::regex samRegex("^(.*?)\\s+(\\d+)\\s+(\\S+)\\s+(\\d+)\\s+(\\d+)\\s+(\\w+)\\t.*NM:i:(\\d+).*cs:(\\S+)");
