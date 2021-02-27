@@ -104,7 +104,7 @@ mask the reference genome
 ```
 dCNS maskGenome -i Zea_mays.AGPv4.dna.toplevel.fa -o masked_B73_v4_k20_46_cds.fa -g Zea_mays.AGPv4.34.gff3 -k b73_m20_mer_counts_dumps.fa -f 46
 ```
-
+#### CNS calling
 prepare the sequence for alignment
 ```
 python3 ./scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV2.py -g Zea_mays.AGPv4.34.gff3 -r Zea_mays.AGPv4.dna.toplevel.fa -c gene.fa -q Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -s setaria.sam -o dCNS_setaria_maize_V2
@@ -132,6 +132,11 @@ cd ../
 perl ./scripts/combineCnsSamFiles.pl  dCNS_setaria_maize_V2 > 5.sam
 ```
 
+#### reformat sam file into bam file
+```
+cat 5.sam| sort | uniq >5_uniq.sam
+samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
+```
 
 ## OUTPUT
 The output file is in sam format, and it works with majority functions implemented in tools compatible with sam format.
