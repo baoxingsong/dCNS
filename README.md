@@ -59,7 +59,7 @@ make
 ```
 
 
-#k-mer masking
+# k-mer masking
 We are using [KAT](https://kat.readthedocs.io/en/latest/) to count k-mers.
 ```
 kat hist -t 12 Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -m 20 -o setaria.kat.m20.hist
