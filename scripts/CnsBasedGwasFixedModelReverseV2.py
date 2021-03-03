@@ -15,69 +15,7 @@ from numpy import linalg
 from scipy import stats
 import warnings
 import re
-
-class LinearModel:
-    """
-    A class for linear models
-    """
-    def __init__(self, Y=None, dtype='float'):
-        """
-        The fixed effects should be a list of fixed effect lists (SNPs)
-        """
-        self.n = len(Y)
-        self.Y = np.matrix(Y, dtype=dtype)
-        self.Y.shape = (self.n, 1)
-        self.X = np.matrix(np.ones((self.n, 1), dtype=dtype))  # The intercept
-        self.p = 1
-    #
-    # def updatey(self, Y, dtype='float'):
-    #     assert (self.n == len(Y))
-    #     self.Y = np.matrix(Y, dtype=dtype)
-    #     self.Y.shape = (self.n, 1)
-    #     # self.X = np.matrix(np.ones((self.n, 1), dtype=dtype))  # The intercept
-    #     # self.p = 1
-    #     # self.beta_est = None
-
-    def add_factor(self, x, lin_depend_thres=1e-4):
-        """
-        Adds an explanatory variable to the X matrix.
-        """
-        new_x = np.array(x)
-        new_x.shape = len(x)
-        if lin_depend_thres>0.0:
-            # Checking whether this new cofactor in linearly independent.
-            (beta, rss, rank, sigma) = linalg.lstsq(self.X, new_x)
-            if float(rss) < lin_depend_thres:
-                warnings.warn(
-                    'A factor was found to be linearly dependent on the factors already in the X matrix.  Hence skipping it!')
-                return False
-        new_x.shape = (self.n, 1)
-        self.X = np.hstack([self.X, new_x])
-        self.p += 1
-        return True
-
-    def get_estimates_fix_model(self, xs=None):
-        X = np.hstack([self.X, xs])
-        q = X.shape[1]  # number of fixed effects
-        n = self.n  # number of individuls
-        p = n - q
-        (beta_est, rss, rank, sigma) = linalg.lstsq(X, self.Y)
-        (h0_betas, h0_rss, h0_rank, h0_s) = linalg.lstsq(self.X, self.Y)
-        if len(rss) == 0:
-            return float(2.0)
-        if len(h0_rss) == 0:
-            return float(2.0)
-        if h0_rss == rss:
-            return float(2.0)
-        f_stat = (h0_rss / rss - 1) * p / xs.shape[1]
-        p_val = stats.f.sf(f_stat, (xs.shape[1]), p)
-        if len(p_val) == 0:
-            return float(2.0)
-        # print(xs)
-        # print("h0_rss:" + str(h0_rss) + " rss:" + str(rss) + " p:" + str(p) + " xs.shape[1]:" + str(xs.shape[1]) + " f_stat:" + str(f_stat) + " p_val:" + str(p_val))
-        p_val = float(p_val)
-        return p_val
-
+import statistics
 def parse_cns_genotype_file(filename, absent_threshold=0.2, present_threshold=0.8, maf_count=5, min_total_count = 17):  # 25 peers and 3 pcs
     """
         read the cns length and coverage file and return a inter genotype table
@@ -111,12 +49,44 @@ def parse_cns_genotype_file(filename, absent_threshold=0.2, present_threshold=0.
                             pn = pn + 1
                         else:
                             snp[i-2] = 3.0 #missing
-                    if( an >= maf_count and pn >= maf_count and (an+pn)>=min_total_count ):
-                        all_snps['chrs'].append(chrom)
-                        all_snps['positions'].append(int(m.group(2)))
-                        all_snps['ends'].append(int(m.group(3)))
-                        all_snps['snps'].append(snp)
+                    all_snps['chrs'].append(chrom)
+                    all_snps['positions'].append(int(m.group(2)))
+                    all_snps['ends'].append(int(m.group(3)))
+                    all_snps['snps'].append(snp)
     return all_snps, individs
+
+
+
+def parse_cns_genotype_file_proportion(filename):
+    """
+        read the cns length and coverage file and return a inter genotype table
+    """
+    individs = []
+    with open(filename) as f:
+        line = f.readline()
+        l = list(map(str.strip, line.split()))
+        for i in range(2, len(l)):
+            individs.append(l[i])
+    num_individs = len(individs)
+    all_snps = {'chrs': [], 'positions': [],  'ends':[], 'snps': []}
+    with open(filename) as f:
+        for line_i, line in enumerate(f):
+            if line_i > 0:
+                l = list(map(str.strip, line.split()))
+                m = re.search('^(\d+):(\d+)\-(\d+)', l[0])
+                if (m != None):
+                    chrom = int(m.group(1))
+                    snp = np.zeros(num_individs, dtype='float')
+                    cns_length = float(l[1])
+                    for i in range(2, num_individs+2, 1):
+                        nt = float(l[i])/float(cns_length)
+                        snp[i-2] = nt
+                    all_snps['chrs'].append(chrom)
+                    all_snps['positions'].append(int(m.group(2)))
+                    all_snps['ends'].append(int(m.group(3)))
+                    all_snps['snps'].append(snp)
+    return all_snps, individs
+
 
 def parse_gene_present_absent_file(filename, absent_threshold=0.4):
     """
@@ -154,10 +124,13 @@ def parse_gene_present_absent_file(filename, absent_threshold=0.4):
     return all_genes, individs, genes
 
 #read genotype data
-genopype, individs = parse_cns_genotype_file("../CNS")
+genopype, individs = parse_cns_genotype_file("../CNS") #the document for generating this file has been released at https://github.com/baoxingsong/CNSpublication/blob/master/CNS_analysis/howToUseCNSABVtoperformGWAS.html
+genopype_proportion, individs_proportion = parse_cns_genotype_file_proportion("../CNS") #the document for generating this file has been released at https://github.com/baoxingsong/CNSpublication/blob/master/CNS_analysis/howToUseCNSABVtoperformGWAS.html
+
+
 # get the genotypic variants taxa id to line number map. line number could be queried from the genotypic variants
 print("cns reading done")
-gene_present_absent, gene_present_absent_individs, gene_present_absent_genes = parse_gene_present_absent_file("../CNS")# the document for generating this file has been released at https://github.com/baoxingsong/CNSpublication/blob/master/CNS_analysis/howToUseCNSABVtoperformGWAS.html
+gene_present_absent, gene_present_absent_individs, gene_present_absent_genes = parse_gene_present_absent_file("../CNS")# here could be modified to exclude absent gene, here we are not doing that
 print("gene reading done")
 
 import sys
@@ -210,40 +183,36 @@ for line in f1:
 f1.close()
 print ("begein association analysis")
 lin_depend_thres=1e-4
-for snp_index in range(len(genopype['snps'])):
-    for gene in phen_dict:
-        p = phen_dict[gene]
-        this_pcs = []
-        this_peers = []
-        this_snp=[]
-        this_phenotype = []
-        an = 0
-        pn = 0
-        for i in range(len(genopype['snps'][snp_index])):
-            if (genopype['snps'][snp_index][i] != 3.0) and (individs[i] in pcs_id) and (individs[i] in peers_id) \
-                    and (individs[i] in phen_individs) and (not (genopype['snps'][snp_index][i] == 0.0 \
-                    and (individs[i] in gene_present_absent_individs) and gene in gene_present_absent_genes \
-                    and gene_present_absent['genes'][gene_present_absent_genes[gene]][gene_present_absent_individs[individs[i]]] == 0.0)):
-                if genopype['snps'][snp_index][i] ==0:
-                    an = an + 1
-                else:
-                    pn = pn + 1
-                this_snp.append(genopype['snps'][snp_index][i])
-                this_pcs.append( pcs[pcs_id[individs[i]]] )
-                this_peers.append(peers[peers_id[individs[i]]])
-                this_phenotype.append(p[phen_individs[individs[i]]])
 
-        if (an >= maf_count and pn >= maf_count and (an + pn) >= min_total_count):
-            lmm = LinearModel(this_phenotype)
-            this_pcs = np.mat(np.array(this_pcs))
-            this_peers = np.mat(np.array(this_peers))
-            for i in range(np.size(this_peers,1)): #put peers as cofactors
-                lmm.add_factor(this_peers[:, i], lin_depend_thres=0.0)
 
-            for i in range(np.size(this_pcs,1)):
-                lmm.add_factor(this_pcs[:, i], lin_depend_thres=lin_depend_thres) # put pcs as cofactors
-            p_val = lmm.get_estimates_fix_model(xs=np.matrix(this_snp).T) # test SNP
-            if p_val <= 1.0:
-                print( str(genopype['chrs'][snp_index]) + " " +
-                        str(genopype['positions'][snp_index]) + " " +
-                        str(genopype['ends'][snp_index]) + " " + str(p_val) + " " + gene)
+used_pav = set()
+
+f = open("cns_gwas_forplot_small", 'rU') # this input is the gene expression level matrix obtained from https://www.nature.com/articles/nature25966
+for line in f:
+    l = list(map(str.strip, line.split()))
+    gene = l[4]
+    for snp_index in range(len(genopype['snps'])):
+        if snp_index not in used_pav:
+            if str(genopype['chrs'][snp_index]) == l[0] and str(genopype['positions'][snp_index]) == l[1] and str(genopype['ends'][snp_index]) == l[2] and gene in phen_dict:
+                used_pav.add(snp_index)
+                p = phen_dict[gene]
+                an_phenotype = []
+                pn_phenotype = []
+                for i in range(len(genopype['snps'][snp_index])):
+                    if (genopype['snps'][snp_index][i] != 3.0) and (individs[i] in pcs_id) and (individs[i] in peers_id) \
+                            and (individs[i] in phen_individs) and (not (genopype['snps'][snp_index][i] == 0.0 \
+                            and (individs[i] in gene_present_absent_individs) and gene in gene_present_absent_genes \
+                            and gene_present_absent['genes'][gene_present_absent_genes[gene]][gene_present_absent_individs[individs[i]]] == 0.0)):
+                        if genopype['snps'][snp_index][i] ==0:
+                            an_phenotype.append(p[phen_individs[individs[i]]])
+                        else:
+                            pn_phenotype.append(p[phen_individs[individs[i]]])
+
+                an_median = statistics.median(an_phenotype)
+                pn_median = statistics.median(pn_phenotype)
+
+                for i in range(len(genopype_proportion['snps'][snp_index])):
+                    if individs[i] in phen_individs and abs(p[phen_individs[individs[i]]] - an_median) < abs(p[phen_individs[individs[i]]] - pn_median) :
+                        print ("absence\t" + gene + "\t" + str(genopype['chrs'][snp_index]) + ":" + str(genopype['positions'][snp_index]) + "-" + str(genopype['ends'][snp_index])  + "\t" + str(genopype_proportion['snps'][snp_index][i]))
+                    elif individs[i] in phen_individs:
+                        print ("presence\t" + gene + "\t" + str(genopype['chrs'][snp_index]) + ":" + str(genopype['positions'][snp_index]) + "-" + str(genopype['ends'][snp_index])  + "\t" + str(genopype_proportion['snps'][snp_index][i]))
