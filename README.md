@@ -78,7 +78,7 @@ ggplot(data=data, aes(x=V1, y=V2)) + geom_line() + xlim(3, 50) + ylim(0, 1000000
 
 According to this plot, pickup a k-mer frequency threshold.
 
-Currently, we use the sencondary drivate to pickup the threshold. (It maybe not the best solution. Other ideas are welcome to test.)
+Currently, we use the secondary derivative to pickup the threshold. (It maybe not the best solution. Other ideas are welcome to test.)
 ```
 data = read.table("setaria.kat.m20.hist")
 d = data.frame(x=diff(diff(data$V2)), y=1:(nrow(data)-2))
