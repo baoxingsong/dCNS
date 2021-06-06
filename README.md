@@ -154,8 +154,10 @@ If you are interested in multiple sequence alignment, Firstly, you should perfor
 Give each sam file a unique name. And use this command to generate multiple sequence alignment.
 `dCNS multCns -i Zea_mays.AGPv4.dna.toplevel.fa -o msa.fasta -s sorghum.sam setaria.sam miscanthus.sam sugarcane.sam 1013.sam 1025.sam`
 
+
+
 # Funding
 This work is funded by NSF #1822330
 
 # Citation
-The dCNS manuscript is under review.
+Baoxing Song, Edward S. Buckler, Hai Wang, Yaoyao Wu, Evan Rees, Elizabeth A. Kellogg, Daniel J. Gates, Merritt Khaipho-Burch, Peter J. Bradbury, Jeffrey Ross-Ibarra, Matthew B. Hufford, and M. Cinta Romay. Conserved noncoding sequences provide insights into regulatory sequence and loss of gene expression in maize. Genome Res. Published in Advance May 27, 2021, doi:10.1101/gr.266528.120
