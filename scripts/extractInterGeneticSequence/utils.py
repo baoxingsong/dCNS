@@ -186,7 +186,7 @@ def readGff(gffFilePath):
                         gene_strand[pname] = strand
                         transcript_gene[name] = pname
                 else:
-                    m = re.search('^(\S+)\s+(\S+)\s+CDS\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?);', line) #update the start and end information of the gene
+                    m = re.search('^(\S+)\s+(\S+)\s+CDS\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?)[;\n]', line) #update the start and end information of the gene
                     # and no matter the strand information the start is always smaller than end
                     if (m != None):
                         pname = m.group(9)
@@ -230,13 +230,15 @@ def allTheCodingInterval(gffFilePath):
         for line in f:
             m = re.search('^#', line)
             if( m == None ):
-                m = re.search('^(\S+)\s+(\S+)\s+gene\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);.*?biotype=protein_coding;', line)
+                #m = re.search('^(\S+)\s+(\S+)\s+gene\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);.*?biotype=protein_coding;', line)
+                m = re.search('^(\S+)\s+(\S+)\s+gene\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);', line)
                 if (m != None): # The begaining of the new gene entry suggests the end of information of last gene entry. So here we could organize the data structure of the last gene
                     if len(gene_name)>0:
                         g = Gene(gene_name, gene_strand[gene_name], gene_start[gene_name], gene_end[gene_name], chromosome_name)
                         chromosome_gene_list[chromosome_name] = np.append(chromosome_gene_list[chromosome_name], [g])
 
-                m = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?);.*?biotype=protein_coding;', line)
+                #m = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?);.*?biotype=protein_coding;', line)
+                m = re.search('^(\S+)\s+(\S+)\s+mRNA\s+(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+.*ID=(.*?);Parent=(.*?);', line)
                 if (m != None):
                     chromosome_name = m.group(1)
                     if (not chromosome_name in chromosome_gene_list):

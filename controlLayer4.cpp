@@ -2159,7 +2159,7 @@ int multCns( int argc, char** argv ){
           "Options" << std::endl <<
           " -i FILE    reference genome file in fasta format" << std::endl <<
           //" -g FILE    query genome files in fasta format" << std::endl <<
-          " -s FILEs   sam files output of any pairwise approach" << std::endl <<
+          " -s FILEs   sam files output from any pairwise approach" << std::endl <<
           " -o FILE    output file in fasta format" << std::endl <<
           " -m FILE    minimum output size (default:" << mini_cns_size << ")" << std::endl <<
           //" -c INT     minimum number of species" << std::endl <<
