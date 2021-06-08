@@ -78,7 +78,7 @@ ggplot(data=data, aes(x=V1, y=V2)) + geom_line() + xlim(3, 50) + ylim(0, 1000000
 
 According to this plot, pickup a k-mer frequency threshold.
 
-Currently, we use the sencondary drivate to pickup the threshold. (It maybe not the best solution. Other ideas are welcome to test.)
+Currently, we use the secondary derivative to pickup the threshold. (It maybe not the best solution. Other ideas are welcome to test.)
 ```
 data = read.table("setaria.kat.m20.hist")
 d = data.frame(x=diff(diff(data$V2)), y=1:(nrow(data)-2))
@@ -88,10 +88,9 @@ kat_jellyfish count -m 20 -s 100M -t 12 -C Setaria_italica.Setaria_italica_v2.0.
 kat_jellyfish dump setaria_k20_count.js > setaria_k20_count_dumps.fa
 ```
 
-mapping the CDS sequence of reference to the query genome sequence
+mapping the CDS sequence of reference to the query genome sequence using [minimap2] (https://github.com/lh3/minimap2)
 ```
 python3 ./scripts/longestTranscript.py -g Zea_mays.AGPv4.dna.toplevel.fa -f Zea_mays.AGPv4.34.gff3 -t false -o gene.fa
-
 minimap2 -ax splice -a -uf -C 1 -k 12 -P -t 12 --cs Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa gene.fa > setaria.sam
 ```
 
@@ -113,13 +112,12 @@ python3 ./scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV
 
 
 go the folder and generate commands, the genome file must be the masked genome
-
 ```
 cd dCNS_setaria_maize_V2
 ls | awk '{print("dCNS cut1Gap -ra masked_B73_v4_k20_46.fa -qa masked_A1025_k20_57.fa -i "$1" -r reference -o "$1".5")}' > command1
 ```
 
-run all the commands with in file `command1` file. I use GNU parallel to run it.
+run all the commands with in file `command1` file. I use [GNU parallel](https://www.gnu.org/software/parallel/) to run it.
 
 check if every command finished successfully
 ```
@@ -132,39 +130,34 @@ cd ../
 perl ./scripts/combineCnsSamFiles.pl  dCNS_setaria_maize_V2 > 5.sam
 ```
 
-#### reformat sam file into bam file
-```
-cat 5.sam| sort | uniq >5_uniq.sam
-samtools view -o 5_.bam -O BAM --reference /media/bs674/2t/genomeSequence/maize/Zea_mays.AGPv4.dna.toplevel.fa  5_uniq.sam; samtools sort -O BAM  -o 5.bam 5_.bam; samtools index 5.bam
-```
-
 ## OUTPUT
 The output file is in sam format, and it works with majority functions implemented in tools compatible with sam format.
 The 5th column is the sequence alignment score. There would be some information lost when converting the sam files into bam files.
 The 6th column is always start with regex `[0-9]+H` , which tells the coordinate where query sequence alignment starts from, the value is 1 based coordinate.
 
-Those SAM files could be reformatted into bam.
+Those SAM files could be reformatted into bam using [samtools](http://www.htslib.org/)
 ```
 cat 5.sam| sort | uniq | awk '{print $1"\t"$2"\t"$3"\t"$4"\t"5"\t"$6"\t"$7"\t"$8"\t"$9"\t"$10"\t"$11}'  | samtools view -O BAM --reference masked_B73_v4_k20_46_cds.fa | samtools sort > 5.bam
 samtools index 5.bam
 ```
 
 To reformat bam file into bed format, we excluded those reference genome masked regions. We did this by using [bedtools](https://github.com/arq5x/bedtools2/) and [SeqKit](https://github.com/shenwei356/seqkit).
-
 ```
 seqkit locate -F --only-positive-strand --bed -m 0 -p n masked_B73_v4_k20_46_cds.fa > ns.bed
 bedtools merge -i ns.bed > ns_megered.bed
 bamToBed -i 5.bam | bedtools sort -i | bedtools merge > 5.bed 
 bedtools subtract -a 5.bed -b ns_megered.bed > 5_nons.bed
 ```
-
+* please NOTE. Each line in the bed file could NOT be interrupted as a CNS
 ## Multiple sequence alignment
 If you are interested in multiple sequence alignment, Firstly, you should perform pair-wise sequence alignment for each species against reference species.
 Give each sam file a unique name. And use this command to generate multiple sequence alignment.
 `dCNS multCns -i Zea_mays.AGPv4.dna.toplevel.fa -o msa.fasta -s sorghum.sam setaria.sam miscanthus.sam sugarcane.sam 1013.sam 1025.sam`
 
+
+
 # Funding
 This work is funded by NSF #1822330
 
 # Citation
-The dCNS manuscript is under review.
+Baoxing Song, Edward S. Buckler, Hai Wang, Yaoyao Wu, Evan Rees, Elizabeth A. Kellogg, Daniel J. Gates, Merritt Khaipho-Burch, Peter J. Bradbury, Jeffrey Ross-Ibarra, Matthew B. Hufford, and M. Cinta Romay. Conserved noncoding sequences provide insights into regulatory sequence and loss of gene expression in maize. Genome Res. Published in Advance May 27, 2021, doi:10.1101/gr.266528.120
