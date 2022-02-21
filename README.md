@@ -98,7 +98,7 @@ minimap2 -ax splice -a -uf -C 1 -k 12 -P -t 12 --cs Setaria_italica.Setaria_ital
 
 mask the query genome
 ```
-dCNS maskGenome -i Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -o masked_setaria_k20_50.fa -s setaria.sam -c gene.fa -k setaria_k20_count_dumps.fa -f 33
+dCNS maskGenome -i Setaria_italica.Setaria_italica_v2.0.dna.toplevel.fa -o masked_setaria_k20_33.fa -s setaria.sam -c gene.fa -k setaria_k20_count_dumps.fa -f 33
 ```
 
 mask the reference genome
@@ -116,7 +116,7 @@ python3 ./scripts/extractInterGeneticSequence/sequenceUpStreamGeneAndDownStreamV
 go the folder and generate commands, the genome file must be the masked genome
 ```
 cd dCNS_setaria_maize_V2
-ls | awk '{print("dCNS cut1Gap -ra masked_B73_v4_k20_46.fa -qa masked_A1025_k20_57.fa -i "$1" -r reference -o "$1".5")}' > command1
+ls | awk '{print("dCNS cut1Gap -ra masked_B73_v4_k20_46_cds.fa -qa masked_setaria_k20_33.fa -i "$1" -r reference -o "$1".5")}' > command1
 ```
 
 run all the commands with in file `command1` file. I use [GNU parallel](https://www.gnu.org/software/parallel/) to run it.
